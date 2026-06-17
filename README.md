@@ -8,33 +8,72 @@ Hades is a programming language created by Toby Paradise as a passion project.
 
 ### Operators
 
-#### Arithmetic
+#### Arithmetic Operators
 
-| Operator |      Meaning      |
-| :------: | :---------------: |
-|    +     |     Addition      |
-|    ++    |  Unary Addition   |
-|    -     |    Subtraction    |
-|    --    | Unary Subtraction |
-|    \*    |  Multiplication   |
-|    /     |     Division      |
-|   \*\*   |  Exponentiation   |
-|   %  |  Modulo   |
+|   Operation    |  Syntax  |
+| :------------: | :------: |
+|   Unary Plus   |   `+a`   |
+|  Unary Minus   |   `-a`   |
+| Incrementation |  `a++`   |
+| Decrementation |  `a--`   |
+|    Addition    | `a + b`  |
+|  Subtraction   | `a - b`  |
+| Multiplication | `a \* b` |
+|    Division    | `a / b`  |
+|     Modulo     | `a % b`  |
 
-#### Comparison
+Note that exponentiation is not defined as an operator, but as a function `pow(a,b)`
 
-| Operator |         Meaning          |
-| :------: | :----------------------: |
-|    ==    |       is equal to        |
-|    !=    |     is not equal to      |
-|   ===    |     is type equal to     |
-|   !==    |    is different type     |
-|    >     |       greater than       |
-|    <     |        less than         |
-|    >=    | greater than or equal to |
-|    <=    |  less than or equal to   |
+#### Comparison Operators
 
-|
+|        Operation         |     Syntax     |
+| :----------------------: | :------------: |
+|         equal to         |    `a == b`    |
+|       not equal to       |    `a != b`    |
+|      type equal to       |   `a === b`    |
+|    type not equal to     |   `a !== b`    |
+|       greater than       |    `a > b`     |
+|        less than         |    `a < b`     |
+| greater than or equal to |    `a >= b`    |
+|  less than or equal to   |    `a <= b`    |
+|         contains         | `a contains b` |
+
+#### Logical Operators
+
+| Operation |   Syntax   |
+| :-------: | :--------: |
+|    NOT    |    `!a`    |
+|    AND    |  `a && b`  |
+|    OR     | `a \|\| b` |
+|    XOR    |  `a ^^ b`  |
+
+#### Bitwise Operations
+
+|  Operation  |  Syntax  |
+| :---------: | :------: |
+|     NOT     |   `~a`   |
+|     AND     | `a & b`  |
+|     OR      | `a \| b` |
+|     XOR     | `a ^ b`  |
+| Shift left  | `a << b` |
+| Shift right | `a >> b` |
+
+#### Assignment Operators
+
+Assignment: `a = b`
+| Syntax | Equivalence |
+| :-----: | :------: |
+| `a += b` | `a = a + b` |
+| `a -= b` | `a = a - b` |
+| `a *= b` | `a = a * b` |
+| `a /= b` | `a = a / b` |
+| `a %= b` | `a = a % b` |
+| `a &&= b` | `a = a && b` |
+| `a \|\|= b` | `a = a \|\| b` |
+| `a ^^= b` | `a = a ^^ b` |
+| `a &= b` | `a = a & b` |
+| `a \|= b` | `a = a \| b` |
+| `a ^= b` | `a = a ^ b` |
 
 ### Datatypes:
 
@@ -151,8 +190,8 @@ Student: class {
     method AgeUp(me) => nothing {
         // by calling me within the function, all variables and methods are
         // automatically included within the scope
-        my.age += 1;
-        my.year += 1;
+        my.age++;
+        my.year++;
     };
 }
 ```
