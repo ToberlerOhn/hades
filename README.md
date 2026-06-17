@@ -6,6 +6,36 @@ Hades is a programming language created by Toby Paradise as a passion project.
 
 ## Basic grammar
 
+### Operators
+
+#### Arithmetic
+
+| Operator |      Meaning      |
+| :------: | :---------------: |
+|    +     |     Addition      |
+|    ++    |  Unary Addition   |
+|    -     |    Subtraction    |
+|    --    | Unary Subtraction |
+|    \*    |  Multiplication   |
+|    /     |     Division      |
+|   \*\*   |  Exponentiation   |
+|   %  |  Modulo   |
+
+#### Comparison
+
+| Operator |         Meaning          |
+| :------: | :----------------------: |
+|    ==    |       is equal to        |
+|    !=    |     is not equal to      |
+|   ===    |     is type equal to     |
+|   !==    |    is different type     |
+|    >     |       greater than       |
+|    <     |        less than         |
+|    >=    | greater than or equal to |
+|    <=    |  less than or equal to   |
+
+|
+
 ### Datatypes:
 
 #### Simple datatypes:
@@ -98,6 +128,7 @@ Bob: struct<Student> = {
 The second can be used for more clarity, especially in cases with large structs with many items to keep track of.
 
 ##### Classes:
+
 A class acts as a constructor or template for objects created using the class. They are like structures, but they can also include methods that act like a function within the class.
 
 Classes use `my.` to refer to in-class methods and variables, like `this` or `self`.
@@ -105,6 +136,7 @@ Classes use `my.` to refer to in-class methods and variables, like `this` or `se
 Classes have a on-creation built in method that is called, well, on creation called creators. This is to initialize any variables or perform any other tasks that you want done automatically. Creators are the always named the same name as the class itself.
 
 Example definition:
+
 ```
 Student: class {
     Student(name: str, age: int, year: int, gpa: float) => nothing {
@@ -116,20 +148,22 @@ Student: class {
         print('My name is %my.name%'); // see further documentation for help on printing
     };
 
-    method AgeUp(me) => nothing { 
-        // by calling me within the function, all variables and methods are 
+    method AgeUp(me) => nothing {
+        // by calling me within the function, all variables and methods are
         // automatically included within the scope
         my.age += 1;
         my.year += 1;
     };
 }
 ```
+
 Example creation:
+
 ```
 Alice: Student = Student{
-    'Alice', 
-    20, 
-    3, 
+    'Alice',
+    20,
+    3,
     3.712};
 Alice.AgeUp();
 print(Alice.age); // prints 21
