@@ -270,6 +270,52 @@ do {
 } while i < 2;
 ```
 
+#### For loops
+
+There are two types of for loops, a for loop and a for-each-in loop.
+
+The below code prints the same as the above while loops:
+
+```
+for (i: int = 0; i < 3; i++) {
+    print(i);
+};
+```
+
+```
+for (i: int; [0, 1, 2] contains i) {
+    print(i)
+}
+```
+## Control flow keywords
+
+### Return
+
+A `return` statement returns a value from a function. This exits out of the function, but only if the return statement is executed (i.e., if the return statement is in an bracket that isn't evaluated then the function continues).
+
+### Next
+
+A `next` statement jumps to the next iterable in the interation. For while loops, this means jumping to the end of the outermost bracket (e.g., where `i++` is). For for loops, this either goes to the next element of  the iterable or runs the next part of the definition (e..g, the `i++` of the loop definition). 
+
+### Break
+
+A `break` statement exits a loop.
+
+### _goTo
+
+A `_goTo` statement goes to a specific label, which is defined at some point during the code.
+
+```
+//...
+if (elem == 'end') {
+    _goTo END
+};
+
+END:
+// code goes here
+```
+
+
 ## Truthiness
 
 Truthiness is used to determien whether a non-boolean value evaluates to a TRUE or FALSE, especially when dealing with if statements (see above)
