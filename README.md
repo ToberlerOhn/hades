@@ -96,9 +96,11 @@ Assignment: `a = b`
 - record &rarr; "element0, element1"
   - records are immutable sequences of items of arbitrary type.
   - attempting to mutate (i.e. update, remove, or add elements) throws a TypeError
+  - accessed using record"element_index"
 
 - list &rarr; [element0, element1...]
   - lists are mutable and have built in methods such as .update(), .remove(), .add(), etc.. See below documentation for more detail.
+  - accessed using list[element_index]
 
 #### Defining variables using datatypes:
 
@@ -139,7 +141,7 @@ func my_function(parameter1: type, paramter2: type...) => ReturnType {
 
 ##### Structures:
 
-Structures (structs) aggregate the storage of multiple data items, of potentially differing data types, into one contiguous memory block referenced by a single variable.
+Structures (structs) aggregate the storage of multiple data items, of potentially differing data types, into one contiguous memory block referenced by a single variable. An item is referred to as a 'struct value'.
 
 Example definition:
 
@@ -172,13 +174,13 @@ A class acts as a constructor or template for objects created using the class. T
 
 Classes use `my.` to refer to in-class methods and variables, like `this` or `self`.
 
-Classes have a on-creation built in method that is called, well, on creation called creators. This is to initialize any variables or perform any other tasks that you want done automatically. Creators are the always named the same name as the class itself.
+Classes have an on-creation built in method that is called on creation (duh), called creators. This is to initialize any variables or perform any other tasks that you want done automatically. Creators are the always named the same name as the class itself.
 
 Example definition:
 
 ```
 Student: class {
-    Student(name: str, age: int, year: int, gpa: float) => nothing {
+    creator Student(name: str, age: int, year: int, gpa: float) => nothing {
         my.name: str = name;
         my.age: int = age;
         my.year: int = year;
@@ -207,3 +209,78 @@ Alice: Student = Student{
 Alice.AgeUp();
 print(Alice.age); // prints 21
 ```
+
+### If statements
+
+If statements are handled like most languages:
+
+```
+foo = 5;
+if (foo == 3) {
+    print('foo is 3');
+} else if (foo == 5) {
+    print('foo is 5');
+} else {
+    print('foo isn\'t 3 or 5')
+}
+// outputs 'foo is 5'
+```
+
+### Loops
+
+There are four types of loops.
+
+#### While loops
+
+A while loop checks a condition, then if the condition is truthy, executes the statement within the brackets. It continues doing this until the condition is false.
+
+```
+while (condition) {
+    // code goes here
+};
+```
+
+Do-while loops first do the statement within brackets, then check the condition after. This means that a do-while loop is executed at least once, buta a while loop may not be executed at all.
+```
+do {
+    // code goes here
+} while (condition);
+```
+
+Here is code using both types of while loops that both output
+```
+0
+1
+2
+```
+using a while loop:
+```
+i = 0;
+while (i < 3) {
+    print(i);
+    i++;
+};
+```
+using a do-while loop:
+```
+i = 0;
+do {
+    print(i);
+    i++
+} while i < 2;
+```
+
+## Truthiness
+
+Truthiness is used to determien whether a non-boolean value evaluates to a TRUE or FALSE, especially when dealing with if statements (see above)
+
+| Data type |    Truthy set     | Falsy set |
+| :-------: | :---------------: | :-------: |
+|  nothing  |        N/A        |    all    |
+|  boolean  |       TRUE        |   FALSE   |
+|  integer  |        ≠ 0        |     0     |
+|   float   |       ≠ 0.0       |    0.0    |
+|  string   |     non-empty     |    ''     |
+|  record   |     non-empty     |    ""     |
+|   list    |     non-empty     |    []     |
+| structure | containing values |   empty   |
