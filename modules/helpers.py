@@ -1,16 +1,20 @@
 import re
 def match(string: str, pattern: str) -> bool:
-    """_summary_
+    """
+
+    Check whether `pattern` matches somewhere in `string`
 
     Args:
-        string (str): the string you want to check for
-        pattern (str): the regex pattern to search in (or any string really)
+        string (str): the string to search within
+        pattern (str): the regex pattern to search for
 
     Returns:
-        bool: whether the string is in the pattern or not
+        bool: whether the pattern was found
     """    
-    m = re.match(pattern, string)
+    m = re.search(pattern, string)
     return bool(m)
 
 if __name__ == '__main__':
-    ...
+    print(match(r'2', r'[\d]'))
+    print(match(r'5', r'535'))
+    print(match(r'5', r'[53]'))

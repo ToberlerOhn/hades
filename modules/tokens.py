@@ -28,6 +28,13 @@ class TT(Enum):
 	STR   = auto()
 	ID    = auto()
 
+	# --------------------------- variable type hints --------------------------- #
+
+	FLOAT_TYPE_HINT = auto() # float
+	INT_TYPE_HINT   = auto() # int
+	BOOL_TYPE_HINT  = auto() # _b
+	STR_TYPE_HINT   = auto() # str
+
 	# -------------------------------- comparisons ------------------------------- #
 	TYPE_EQ  = auto() #  ===
 	TYPE_NEQ = auto() # \!==
@@ -52,10 +59,14 @@ class TT(Enum):
 	STAR      = auto() #\*
 	SLASH     = auto() #\/\/
 	PERCENT   = auto() # %
+	ASSIGN    = auto() # =
 
 	# --------------------------------- grouping --------------------------------- #
 	LPAREN = auto() #(
 	RPAREN = auto() #)
+
+	SEMICOLON = auto()
+	COLON     = auto()
 
 	EOF = auto()
 
