@@ -75,6 +75,10 @@ Assignment: `a = b`
 | `a \|= b` | `a = a \| b` |
 | `a ^= b` | `a = a ^ b` |
 
+#### Operator Overloading
+
+Operator overloading is used to redefine the use of an operator in a specific use case such as for a specific class (see below).
+
 ### Datatypes:
 
 #### Simple datatypes:
@@ -195,7 +199,13 @@ Student: class {
         my.age++;
         my.year++;
     };
-}
+
+    // operator overloading exmaple from above
+    operator !(me) => bool {
+        if (my.name && my.age && my.year && my.gpa) {return False};
+        return True;
+    };
+};
 ```
 
 Example creation:
@@ -208,6 +218,7 @@ Alice: Student = Student{
     3.712};
 Alice.AgeUp();
 print(Alice.age); // prints 21
+!Alice // False
 ```
 
 ### If statements
