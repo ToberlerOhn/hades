@@ -341,3 +341,16 @@ Truthiness is used to determien whether a non-boolean value evaluates to a TRUE 
 |  record   |     non-empty     |    ""     |
 |   list    |     non-empty     |    []     |
 | structure | containing values |   empty   |
+
+## Precedence
+
+1.  Assignment         (=                                                ) <- lowest precedence, right-associative
+2.  Logical OR/XOR     (||, ^^                                           )
+3.  LogicalAND         (&&                                               )
+4.  Equality           (==, !=, ===, !==                                 )
+5.  Comparison         (<, >, <=, >=                                     )
+6.  Additive           (+, -                                             )
+7.  Multiplicative     (*, /, %                                          )
+8.  Unary              (!, -, unary +                                    )
+9.  Postfix            (++, --                                           )
+10. Primary            (numbers, strings, ids, bools, parenthesized exprs) <- highest precedence
