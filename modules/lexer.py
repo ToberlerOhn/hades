@@ -121,6 +121,14 @@ class Lexer:
 	
 	def get_next_token(self) -> Token:
 		while self.current:
+			while True:
+				before = self.pos
+				self.skip_whitespace()
+				self.skip_comment()
+				if self.pos == before:
+					break
+			if not self.current:
+				break
 			start_line, start_col = self.line, self.column
 
 			# skip whitespace and comments:
@@ -207,6 +215,7 @@ class Lexer:
 				')': TT.RPAREN,
 				';': TT.SEMICOLON,
 				':': TT.COLON,
+				'!': TT.NOT,
 			}
 
 			if self.current in SINGLE_CHAR_TOKENS:
@@ -244,6 +253,7 @@ class Lexer:
 if __name__ == '__main__':
 	test = \
 	'''
+	//test
 	x: int = 5
 	y: float = 5.2
 	2 + x * 2;
