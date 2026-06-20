@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from typing import Any as any
 from tokens import Token
 
+type Node = (NumberNode | BoolNode | StringNode | IdNode | \
+BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
+ProgramNode)
+
 # ---------------------------------------------------------------------------- #
 #                                   Literals                                   #
 # ---------------------------------------------------------------------------- #
