@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------- #
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any as any
 from tokens import Token
 
 # ---------------------------------------------------------------------------- #
@@ -14,7 +14,7 @@ from tokens import Token
 
 @dataclass
 class NumberNode:
-    value: Any
+    value: any
     token: Token
 
     def __repr__(self):
@@ -22,7 +22,7 @@ class NumberNode:
 
 @dataclass
 class BoolNode:
-    value: Any
+    value: any
     token: Token
 
     def __repr__(self):
@@ -30,7 +30,7 @@ class BoolNode:
 
 @dataclass
 class StringNode:
-    value: Any
+    value: any
     token: Token
 
     def __repr__(self):
@@ -38,7 +38,7 @@ class StringNode:
 
 @dataclass
 class IdNode:
-    value: Any
+    value: any
     token: Token
 
     def __repr__(self):
@@ -51,9 +51,9 @@ class IdNode:
 @dataclass
 class BinOpNode:
     """Binary operations like arithmetic"""
-    left: Any
+    left: any
     op_token: Token
-    right: Any
+    right: any
 
     def __repr__(self):
         return f'BinOpNode({self.left!r}, {self.op_token.type}, {self.right!r})'
@@ -61,7 +61,7 @@ class BinOpNode:
 class UnaryOpNode:
     """Unary operations like negation"""
     op_token: Token
-    operand: Any
+    operand: any
 
     def __repr__(self):
         return f'UnaryOpNode({self.op_token.type}, {self.operand!r})'
@@ -69,7 +69,7 @@ class UnaryOpNode:
 @dataclass
 class PostfixOpNode:
     """Postfix operations like incrementation"""
-    operand: Any
+    operand: any
     op_token: Token
 
     def __repr__(self):
@@ -78,7 +78,7 @@ class PostfixOpNode:
 @dataclass
 class AssignNode:
     name_token: Token
-    value: Any
+    value: any
 
     def __repr__(self):
         return f'AssignNode({self.name_token.value!r} = {self.value!r})'
@@ -87,7 +87,7 @@ class AssignNode:
 class VarDeclNode:
     name_token: Token
     type_hint: Token
-    value: Any
+    value: any
 
     def __repr__(self):
         return f'VarDeclNode({self.name_token.value!r}: {self.type_hint.type} = {self.value!r})'
