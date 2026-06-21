@@ -22,7 +22,8 @@ Hades is a programming language created by Toby Paradise as a passion project.
 |    Division    | `a / b`  |
 |     Modulo     | `a % b`  |
 
-Note that exponentiation is not defined as an operator, but as a function `pow(a,b)`
+N.B.: Unary plus is equivalent to absolute value
+    : Exponentiation is not defined as an operator, but as a function `pow(a,b)`
 
 #### Comparison Operators
 
@@ -61,19 +62,19 @@ Note that exponentiation is not defined as an operator, but as a function `pow(a
 #### Assignment Operators
 
 Assignment: `a = b`
-| Syntax | Equivalence |
-| :-----: | :------: |
-| `a += b` | `a = a + b` |
-| `a -= b` | `a = a - b` |
-| `a *= b` | `a = a * b` |
-| `a /= b` | `a = a / b` |
-| `a %= b` | `a = a % b` |
-| `a &&= b` | `a = a && b` |
+| Syntax      | Equivalence    |
+| :-----:     | :------:       |
+| `a += b`    | `a = a + b`    |
+| `a -= b`    | `a = a - b`    |
+| `a *= b`    | `a = a * b`    |
+| `a /= b`    | `a = a / b`    |
+| `a %= b`    | `a = a % b`    |
+| `a &&= b`   | `a = a && b`   |
 | `a \|\|= b` | `a = a \|\| b` |
-| `a ^^= b` | `a = a ^^ b` |
-| `a &= b` | `a = a & b` |
-| `a \|= b` | `a = a \| b` |
-| `a ^= b` | `a = a ^ b` |
+| `a ^^= b`   | `a = a ^^ b`   |
+| `a &= b`    | `a = a & b`    |
+| `a \|= b`   | `a = a \| b`   |
+| `a ^= b`    | `a = a ^ b`    |
 
 #### Operator Overloading
 
