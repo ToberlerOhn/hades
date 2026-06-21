@@ -69,43 +69,139 @@ class Interpreter:
             TT.NOT   : lambda o: not bool(o)
         }
 
+        self.POSTFIX_OPS: dict[TT, callable] = {
+            TT.INCREMENT: lambda o: o + 1,
+            TT.DECREMENT: lambda o: o - 1
+        }
+
     # ------------------------------ entry point ----------------------------- #
 
-    def evauluate(self, node):
+    def evaluate(self, node):
         handler = self.NODE_HANDLERS.get(type(node))
         if handler is None:
             raise InterpreterError(f'No evaluator for node type: {type(node).__name__}')
         return handler(node)
+
+    # ------------------------------ statements ------------------------------ #
+
+    def _eval_program(self, node: ast.ProgramNode):
+        result = None
+        for statement in node.statements:
+            result = self.evaluate(statement)
+        return result
+        
+    def _eval_vardecl(self, node: ast.VarDeclNode):
+        value = self.evaluate(node.value)
+        self._check_type_hint(value, node.type_hint, node.name_token)
+        self.scope.declare(node.name_token.value, value)
+        return value
     
-    def _eval_program(self):
-        ...
+    def _eval_assign(self, node: ast.AssignNode):
+        value = self.evaluate(node.value)
+        try:
+            self.scope.set(node.name_token.value, value)
+        except:
+            raise InterpreterError(f'Cannot assign undeclared variable \'{node.name_token.value}\'', node.name_token)
+        return value
     
-    def _eval_number(self):
-        ...
+    # ------------------------------- literals ------------------------------- #
     
-    def _eval_bool(self):
-        ...
+    def _eval_number(self, node: ast.NumberNode):
+        return node.value
     
-    def _eval_string(self):
-        ...
+    def _eval_bool(self, node: ast.BoolNode):
+        return node.value
     
-    def _eval_id(self):
-        ...
+    def _eval_string(self, node: ast.StringNode):
+        return node.value
     
-    def _eval_binop(self):
-        ...
+    def _eval_id(self, node: ast.IdNode):
+        try:
+            return self.scope.get(node.value)
+        except KeyError:
+            raise InterpreterError(f'Undefined variable \'{node.value}\'', node.token)
+
+    # ------------------------------ operations ------------------------------ #
+
+    def _eval_binop(self, node: ast.BinOpNode):
+        left = self.evaluate(node.left)
+        right = self.evaluate(node.right)
+        op_type = node.op_token.type
+
+        func = self.BINARY_OPS.get(op_type)
+        if func is None:
+            raise InterpreterError(f'Unknown binary operator: {op_type}', node.op_token)
+        
+        try:
+            return func(left, right)
+        except ZeroDivisionError:
+            raise InterpreterError(f'Division by zero', node.op_token)
+        except TypeError as e:
+            raise InterpreterError(
+                f'Invalid operand types for {op_type.name}: {type(left).__name__} and {type(right).__name__}', 
+                node.op_token) from e
+        
+    def _eval_unaryop(self, node: ast.UnaryOpNode):
+        value = self.evaluate(node.operand)
+        op_type = node.op_token.type
+
+        func = self.UNARY_OPS.get(op_type)
+        if func is None:
+            raise InterpreterError(f'Unknown unary operator: {op_type}', node.op_token)
+        
+        try:
+            return func(value)
+        except TypeError as e:
+            raise InterpreterError(
+                f"Invalid operand type for {op_type.name}: {type(value).__name__}",
+                node.op_token,
+            ) from e
+
+    def _eval_postfixop(self, node: ast.PostfixOpNode):
+        if not isinstance(node.operand, ast.IdNode):
+            raise InterpreterError(
+                f'Invalid target for {node.op_token.type.name}: {node.operand!r}',
+                node.op_token
+            )
+        
+        name = node.operand.value
+        op_type = node.op_token.type
+        try:
+            old_value = self.scope.get(name)
+        except KeyError:
+            raise InterpreterError(f'Undefined variable: \'{name}\'', node.operand.token)
+        
+        func = self.POSTFIX_OPS.get(op_type)
+        if func is None:
+            raise InterpreterError(f'Unknown postfix operator: \'{op_type}\'', node.op_token)
+        new_value = func(old_value)
+
+        self.scope.set(name, new_value)
+        return old_value
     
-    def _eval_unaryop(self):
-        ...
+    # --------------------------- helper functions --------------------------- #
+
+    def _check_type_hint(self, value, type_hint_token: Token, name_token: Token):
+        expected = {
+            TT.INT_TYPE_HINT  : int,
+            TT.FLOAT_TYPE_HINT: float,
+            TT.BOOL_TYPE_HINT : bool,
+            TT.STR_TYPE_HINT  : str,
+        }.get(type_hint_token.type)
+
+        if expected is None:
+            return
+        
+        if expected is bool and not isinstance(value, bool):
+            raise InterpreterError(
+                f'Type mismatch for \'{name_token.value}\': expected bool, but got {type(value).__name__}',
+                name_token
+            )
+        if expected is not bool and not isinstance(value, expected):
+            raise InterpreterError(
+                f'Type mismatch for \'{name_token.value}\': expected {expected.__name__}, but got {type(value).__name__}',
+                name_token
+            )
     
-    def _eval_postfixop(self):
-        ...
-    
-    def _eval_assign(self):
-        ...
-    
-    def _eval_vardecl(self):
-        ...
-    
-        ...
-    
+def interpret_program(tree: ast.ProgramNode):
+    return Interpreter().evaluate(tree)
