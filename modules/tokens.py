@@ -62,11 +62,21 @@ class TT(Enum):
 	ASSIGN    = auto() # =
 
 	# --------------------------------- grouping --------------------------------- #
-	LPAREN = auto() #(
-	RPAREN = auto() #)
+	LPAREN   = auto() # (
+	RPAREN   = auto() # )
+	LBRACE   = auto() # {
+	RBRACE   = auto() # }
+	LBRACKET = auto() # [
+	RBRACKET = auto() # ]
 
-	SEMICOLON = auto()
-	COLON     = auto()
+	# ------------------------------- punctuation ------------------------------- #
+	SEMICOLON = auto() # ;
+	COLON     = auto() # :
+	COMMA     = auto() # ,
+
+	# --------------------------------- keywords -------------------------------- #
+	IF   = auto() # if
+	ELSE = auto() # else
 
 	EOF = auto()
 
@@ -83,4 +93,3 @@ class Token:
 
 	def __repr__(self):
 		return f'Token({self.type}, {self.value!r}, {self.line}:{self.column})'
-	

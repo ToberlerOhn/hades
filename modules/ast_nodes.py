@@ -10,6 +10,7 @@ from tokens import Token
 
 type Node = (NumberNode | BoolNode | StringNode | IdNode | \
 BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
+IfNode | CallNode |\
 ProgramNode)
 
 # ---------------------------------------------------------------------------- #
@@ -95,7 +96,27 @@ class VarDeclNode:
 
     def __repr__(self):
         return f'VarDeclNode({self.name_token.value!r}: {self.type_hint.type} = {self.value!r})'
+    
+# ---------------------------------------------------------------------------- #
+#                                 Control Flow                                 #
+# ---------------------------------------------------------------------------- #
 
+@dataclass
+class IfNode:
+    branches: list[tuple[any, list]]
+    else_body: list | None
+
+    def __repr__(self):
+        return f'IfNode(branches={self.branches!r}, else_body = {self.else_body!r})'
+
+@dataclass
+class CallNode:
+    """Call a function"""
+    callee_token: Token # the function being called
+    args: list
+
+    def __repr__(self):
+        return f'CallNode({self.callee_token.value!r}, args={self.args!r})'
 
 # ---------------------------------------------------------------------------- #
 #                                   Grouping                                   #

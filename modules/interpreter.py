@@ -42,6 +42,8 @@ class Interpreter:
             ast.PostfixOpNode: self._eval_postfixop,
             ast.AssignNode   : self._eval_assign,
             ast.VarDeclNode  : self._eval_vardecl,
+            ast.CallNode     : self._eval_call,
+            ast.IfNode       : self._eval_if,
         }
 
         self.BINARY_OPS: dict[TT, callable] = {
@@ -74,6 +76,10 @@ class Interpreter:
             TT.DECREMENT: lambda o: o - 1
         }
 
+        self.BUILTINS: dict[str, callable] = {
+            'print': self.__print__
+        }
+
     # ------------------------------ entry point ----------------------------- #
 
     def evaluate(self, node):
@@ -103,6 +109,29 @@ class Interpreter:
         except:
             raise InterpreterError(f'Cannot assign undeclared variable \'{node.name_token.value}\'', node.name_token)
         return value
+    
+    def _eval_if(self, node: ast.IfNode):
+        for condition, body in node.branches:
+            if self._truthy(self.evaluate(condition)):
+                return self._eval_statements(body)
+        if node.else_body is not None:
+            return self._eval_statements(node.else_body)
+        return None
+    
+    def _eval_statements(self, statements: list):
+        result = None
+        for statement in statements:
+            result = self.evaluate(statement)
+        return result
+    
+    def _eval_call(self, node: ast.CallNode):
+        name = node.callee_token.value
+        func = self.BUILTINS.get(name)
+        if func is None:
+            raise InterpreterError(f'Undefined function \'{name}\'', node.callee_token)
+        
+        args = [self.evaluate(arg) for arg in node.args]
+        return func(args, node.callee_token)
     
     # ------------------------------- literals ------------------------------- #
     
@@ -179,7 +208,33 @@ class Interpreter:
         self.scope.set(name, new_value)
         return old_value
     
+    # ------------------------------- built-ins ------------------------------ #
+
+    def __print__(self, args: list, call_token: Token):
+        print(*(self._to_string(a) for a in args))
+        return None
+    
+    @staticmethod
+    def _to_string(value) -> str:
+        if isinstance(value, bool):
+            return 'TRUE' if value else 'FALSE'
+        if value is None:
+            return 'nothing'
+        return str(value)
+    
     # --------------------------- helper functions --------------------------- #
+
+    @staticmethod
+    def _truthy(value) -> bool:
+        if value is None:
+            return False
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            return value != ''
+        return bool(value)
 
     def _check_type_hint(self, value, type_hint_token: Token, name_token: Token):
         expected = {

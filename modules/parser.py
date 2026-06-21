@@ -9,6 +9,9 @@ import ast_nodes as ast
 #                                    Parser                                    #
 # ---------------------------------------------------------------------------- #
 
+class ParserError(SyntaxError):
+    ...
+
 class Parser:
     def __init__(self, tokens: list[Token]):
         if not tokens:
@@ -24,8 +27,12 @@ class Parser:
             TT.STR   : self._parse_string,
             TT.ID    : self._parse_identifier,
             TT.LPAREN: self._parse_grouping,
-
         }
+
+        self.STATEMENT_HANDLERS = {
+            TT.IF: self.parse_if
+        }
+
         self.TYPE_HINT_TTs = (TT.INT_TYPE_HINT, TT.FLOAT_TYPE_HINT, TT.STR_TYPE_HINT, TT.BOOL_TYPE_HINT)
 
     # ------------------------- pre-parsing variables ------------------------ #
@@ -61,7 +68,7 @@ class Parser:
         """consumes the current token if it matches the expected `token_type`,
         else raises a parse error"""
         if self.current.type != token_type:
-            raise SyntaxError(f'Expected {token_type}, got {self.current.type}'
+            raise ParserError(f'Expected {token_type}, got {self.current.type}'
                               f'at {self.current.line}, {self.current.column}')
         token = self.current
         self.advance()
@@ -83,8 +90,13 @@ class Parser:
     # ------------------------------ statements ------------------------------ #
 
     def parse_statement(self):
-        if self.check(TT.ID) and self.peek() is not None and self.peek().type == TT.COLON: # pyright: ignore[reportOptionalMemberAccess]
+        if self.check(TT.ID) and (peek1 := self.peek()) is not None and peek1.type == TT.COLON:
             return self.parse_var_decl()
+
+        handler = self.STATEMENT_HANDLERS.get(self.current.type)
+        if handler is not None:
+            return handler()
+
         return self.parse_expression()
     
     def parse_var_decl(self):
@@ -92,12 +104,13 @@ class Parser:
         self.expect(TT.COLON)
         type_hint = self.current
         if type_hint.type not in self.TYPE_HINT_TTs:
-            raise SyntaxError(f'Expected a type hint, but got a {type_hint.type} '
+            raise ParserError(f'Expected a type hint, but got a {type_hint.type} '
                               f'at {type_hint.line, type_hint.column}')
         self.advance()
         self.expect(TT.ASSIGN)
         value = self.parse_expression()
         return ast.VarDeclNode(name_token, type_hint, value)
+    
     
     # ------------------------------ expressions ----------------------------- #
 
@@ -108,7 +121,7 @@ class Parser:
         left = self.parse_binary()
         if self.check(TT.ASSIGN):
             if not isinstance(left, ast.IdNode):
-                raise SyntaxError(f'Invalid assignment target: {left!r}')
+                raise ParserError(f'Invalid assignment target: {left!r}')
             self.advance()
             right = self.parse_assignment()
             return ast.AssignNode(left.token, right)
@@ -125,7 +138,6 @@ class Parser:
             self.advance()
             right = self.parse_binary(precedence + 1)
             left = ast.BinOpNode(left, op, right)
-
         return left
     
     def parse_unary(self):
@@ -138,17 +150,68 @@ class Parser:
     
     def parse_postfix(self):
         node = self.parse_primary()
-        while self.check(*self.POSTFIX_OPS):
-            op = self.current
-            self.advance()
-            node = ast.PostfixOpNode(node, op)
+        while True:
+            if self.check(*self.POSTFIX_OPS):
+                op = self.current
+                self.advance()
+                node = ast.PostfixOpNode(node, op)
+            elif self.check(TT.LPAREN):
+                node = self.parse_call(node)
+            else:
+                break
         return node
+        
+    
+    def parse_call(self, callee_node): # VVV callee_node should be an IdNode
+        if not isinstance(callee_node, ast.IdNode):
+            raise ParserError(f'Cannot call non-identifier expression: {callee_node!r}')
+        
+        self.expect(TT.LPAREN)
+        args = []
+        if not self.check(TT.RPAREN):
+            args.append(self.parse_expression())
+            while self.check(TT.COMMA):
+                self.advance()
+                args.append(self.parse_expression())
+        self.expect(TT.RPAREN)
+
+        return ast.CallNode(callee_node.token, args)
+    
+    def parse_if(self) -> ast.IfNode:
+        """
+        if cond {...}
+        else if (cond) {...} <- Zero or more else if blocks
+        else {...} <- optional but must be last"""
+        branches = []
+        else_body = None
+
+        self.expect(TT.IF)
+        self.expect(TT.LPAREN)
+        condition = self.parse_expression()
+        self.expect(TT.RPAREN)
+        body = self._parse_block()
+        branches.append((condition, body))
+
+        while self.check(TT.ELSE):
+            self.advance()
+            if self.check(TT.IF): # elif blocks
+                self.advance()
+                self.expect(TT.LPAREN)
+                condition = self.parse_expression()
+                self.expect(TT.RPAREN)
+                body = self._parse_block()
+                branches.append((condition, body))
+            else:
+                else_body = self._parse_block()
+                break
+
+        return ast.IfNode(branches, else_body)
     
     def parse_primary(self):
         handler = self.PRIMARY_HANDLERS.get(self.current.type)
         if handler is None:
-            raise SyntaxError(
-                f'Unexpected token in expression: {self.current.type}'
+            raise ParserError(
+                f'Unexpected token in expression: {self.current.type} '
                 f'at {self.current.line}, {self.current.column}'
             )
         return handler()
@@ -175,11 +238,27 @@ class Parser:
         self.advance()
         return ast.IdNode(tok.value, tok)
     
+    
+    # ----------------------------- parse helpers ---------------------------- #
     def _parse_grouping(self):
         self.advance()
-        expr = self.parse_expression()
+        expression = self.parse_expression()
         self.expect(TT.RPAREN)
-        return expr
+        return expression
+    
+    def _parse_block(self):
+        statements = []
+        self.expect(TT.LBRACE)
+        while not self.check(TT.RBRACE):
+            if self.check(TT.EOF):
+                raise ParserError(
+                    f'Unterminated block, expected \'}}\' but reached end of input '
+                    f'at {self.current.line},{self.current.column}'
+                )
+            statements.append(self.parse_expression())
+            if self.check(TT.SEMICOLON): self.advance()
+        self.expect(TT.RBRACE)
+        return statements
     
     
 def parse(tokens: list[Token]) -> ast.ProgramNode:
@@ -202,7 +281,7 @@ if __name__ == '__main__':
             result = Parser(tokens).parse()
             print(result)
             return result
-        except SyntaxError as e:
+        except ParserError as e:
             print("ParseError:", e)
             return ast.ProgramNode([Token(TT.EOF, None, -1, -1)])
     

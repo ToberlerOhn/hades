@@ -109,6 +109,9 @@ class Lexer:
 			'int'  : TT.INT_TYPE_HINT,
 			'str'  : TT.STR_TYPE_HINT,
 			'float': TT.FLOAT_TYPE_HINT,
+
+			'if': TT.IF,
+			'else': TT.ELSE
 		}
 
 		tokenType = keywords.get(id, TT.ID)
@@ -213,8 +216,13 @@ class Lexer:
 				'=': TT.ASSIGN,
 				'(': TT.LPAREN,
 				')': TT.RPAREN,
+				'{': TT.LBRACE,
+				'}': TT.RBRACE,
+				'[': TT.LBRACKET,
+				']': TT.RBRACKET,
 				';': TT.SEMICOLON,
 				':': TT.COLON,
+				',': TT.COMMA,
 				'!': TT.NOT,
 			}
 
@@ -254,6 +262,8 @@ if __name__ == '__main__':
 	test = \
 	'''
 	//test
+	if (1 == 2) {
+		a: int = 3};
 	x: int = 5
 	y: float = 5.2
 	2 + x * 2;

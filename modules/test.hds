@@ -1,3 +1,1 @@
-x: int = 5;
-y: float = 3.5;
-x && FALSE;
+x:int=3y:float=x+0.2if(x+y<=6){print(x,y,6)}else{if(x+y<=6.2){print(x,y,6.2,'yes!')}}
