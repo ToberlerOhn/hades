@@ -1,0 +1,25 @@
+{
+  "name": "hades-language",
+  "displayName": "Hades Language Support",
+  "description": "Syntax highlighting and language support for for the Hades programming language.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.125.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "hades",
+      "aliases": ["Hades", "hades"],
+      "extensions": [".hds",".hd"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "hades",
+      "scopeName": "source.hades",
+      "path": "./syntaxes/hades.tmLanguage.json"
+    }]
+  }
+}
