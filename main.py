@@ -17,9 +17,15 @@ def main():
 
     file_path = Path(sys.argv[1])
 
+    if not str(file_path).endswith(('.hds', '.hd')):
+        file_path = file_path.with_suffix(".hds")
+
     if not file_path.exists():
-        print(f'Error: file path not found: {file_path}')
-        sys.exit(1)
+        if file_path.with_suffix(".hd").exists():
+            file_path = file_path.with_suffix(".hd")
+        else:
+            print(f'Error: file path not found: {file_path}')
+            sys.exit(1)
     
     if file_path.suffix not in ['.hd', '.hds']:
         print(f'Warning: expected a .hds file, got \'{file_path.suffix}\'')

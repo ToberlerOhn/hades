@@ -3,3 +3,6 @@ y: float = x + 0.2
 if(x+y<=6) {
     print(x, y, 6)} else if (x + y <= 6.2) {
     print(x,y,6.2,'yes!')}
+else {
+    print(x,y,6.2,'no!')
+}

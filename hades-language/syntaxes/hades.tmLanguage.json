@@ -1,48 +1,54 @@
 {
-	// "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "Hades",
-	"patterns": [
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#types"
-		},
-		{
-			"include": "#strings"
-		},
-		{
-			"include": "#numbers"
-		}
-	],
-	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.hades",
-				"match": "\\b(if|else|)\\b"
-			}]
-		},
-		"types": {
-			"patterns": [{
-				"name": "storage.type.hades",
-				"match": "\\b(int|float|bool|str)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.single.hades",
-			"begin": "'",
-			"end": "'",
-			"patterns": [{
-				"name": "constant.character.escape.hades",
-				"match": "\\\\."
-			}]
-		},
-		"numbers": {
-			"patterns": [{
-				"match": "\\b\\d+(\\.\\d+)?\\b",
-				"name": "constant.numeric.hades"
-			}]
-		}
-	},
-	"scopeName": "source.hades"
+  "scopeName": "source.hades",
+  "name": "Hades",
+  "patterns": [
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#strings" },
+    { "include": "#numbers" }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.hades",
+          "match": "\\b(if|else)\\b"
+        }
+      ]
+    },
+
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.hades",
+          "match": "\\b(int|float|bool|str)\\b"
+        }
+      ]
+    },
+
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hades",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.hades",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.hades",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    }
+  }
 }
