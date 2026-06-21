@@ -3,6 +3,7 @@
   "displayName": "Hades Language Support",
   "description": "Syntax highlighting and language support for for the Hades programming language.",
   "version": "0.0.1",
+  "publisher": "tobyp",
   "engines": {
     "vscode": "^1.125.0"
   },
