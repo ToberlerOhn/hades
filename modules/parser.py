@@ -2,8 +2,8 @@
 #                                    Imports                                   #
 # ---------------------------------------------------------------------------- #
 
-from tokens import TT, Token
-import ast_nodes as ast
+from .tokens import TT, Token
+import modules.ast_nodes as ast
 
 # ---------------------------------------------------------------------------- #
 #                                    Parser                                    #

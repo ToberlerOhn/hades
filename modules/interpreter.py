@@ -2,9 +2,9 @@
 #                                    Imports                                   #
 # ---------------------------------------------------------------------------- #
 
-import ast_nodes as ast
-from tokens import TT, Token
-from scope import Scope
+import modules.ast_nodes as ast
+from .tokens import TT, Token
+from .scope import Scope
 from typing import Any as any
 from typing import Callable as callable
 
