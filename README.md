@@ -6,6 +6,15 @@ Hades is a programming language created by Toby Paradise as a passion project.
 
 ## Basic grammar
 
+### Semicolon rules
+
+- Required in general (e.g. `x = 5` must be followed by `;`).
+- NOT required if the statement just parsed ended in '}' (e.g. an
+    `if`/`while`/`for` block) - the brace is unambiguous on its own.
+- NOT required if we're now sitting on '}' or EOF - i.e. this was
+    the last statement in a block, or the last statement in the file.
+
+
 ### Operators
 
 #### Arithmetic Operators
