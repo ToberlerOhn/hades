@@ -23,7 +23,7 @@ class Lexer:
 		raise SyntaxError(f'Lexer error at ({self.line}, {self.column}): {message}')
 
 	def advance(self, steps: int =1) -> None:
-		for i in range(steps):
+		for _ in range(steps):
 			if self.current == '\n':
 				self.line += 1
 				self.column = 1
@@ -110,8 +110,10 @@ class Lexer:
 			'str'  : TT.STR_TYPE_HINT,
 			'float': TT.FLOAT_TYPE_HINT,
 
-			'if': TT.IF,
-			'else': TT.ELSE
+			'if'   : TT.IF,
+			'else' : TT.ELSE,
+			'while': TT.WHILE,
+			'for'  : TT.FOR,
 		}
 
 		tokenType = keywords.get(id, TT.ID)

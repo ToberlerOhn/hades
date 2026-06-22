@@ -44,6 +44,7 @@ class Interpreter:
             ast.VarDeclNode  : self._eval_vardecl,
             ast.CallNode     : self._eval_call,
             ast.IfNode       : self._eval_if,
+            ast.WhileNode    : self._eval_while,
         }
 
         self.BINARY_OPS: dict[TT, callable] = {
@@ -118,6 +119,13 @@ class Interpreter:
             return self._eval_statements(node.else_body)
         return None
     
+    def _eval_while(self, node: ast.WhileNode):
+        condition, body = node.condition, node.body
+        result = None
+        while self._truthy(self.evaluate(condition)):
+            result = self._eval_statements(body)
+        return result
+
     def _eval_statements(self, statements: list):
         result = None
         for statement in statements:
@@ -220,6 +228,8 @@ class Interpreter:
             return 'TRUE' if value else 'FALSE'
         if value is None:
             return 'nothing'
+        if isinstance(value, float):
+            return f'{value:.10g}'.rstrip('0').rstrip('.') if '.' in f'{value:.10g}' else f'{value:.10g}'
         return str(value)
     
     # --------------------------- helper functions --------------------------- #

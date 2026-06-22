@@ -4,6 +4,7 @@
 
 from .tokens import TT, Token
 import modules.ast_nodes as ast
+from typing import Callable as callable
 
 # ---------------------------------------------------------------------------- #
 #                                    Parser                                    #
@@ -20,7 +21,7 @@ class Parser:
         self.pos = 0
         self.current = self.tokens[0]
 
-        self.PRIMARY_HANDLERS = {
+        self.PRIMARY_HANDLERS: dict[TT, callable] = {
             TT.INT   : self._parse_number,
             TT.FLOAT : self._parse_number,
             TT.BOOL  : self._parse_bool,
@@ -29,8 +30,9 @@ class Parser:
             TT.LPAREN: self._parse_grouping,
         }
 
-        self.STATEMENT_HANDLERS = {
-            TT.IF: self.parse_if
+        self.STATEMENT_HANDLERS: dict[TT, callable] = {
+            TT.IF: self.parse_if,
+            TT.WHILE: self.parse_while,
         }
 
         self.TYPE_HINT_TTs = (TT.INT_TYPE_HINT, TT.FLOAT_TYPE_HINT, TT.STR_TYPE_HINT, TT.BOOL_TYPE_HINT)
@@ -68,7 +70,7 @@ class Parser:
         """consumes the current token if it matches the expected `token_type`,
         else raises a parse error"""
         if self.current.type != token_type:
-            raise ParserError(f'Expected {token_type}, got {self.current.type}'
+            raise ParserError(f'Expected {token_type}, got {self.current.type} '
                               f'at {self.current.line}, {self.current.column}')
         token = self.current
         self.advance()
@@ -77,19 +79,37 @@ class Parser:
     def check(self, *token_types: TT) -> bool:
         return self.current.type in token_types
     
+    def _consume_statement_terminator(self) -> None:
+        """
+        Semicolon rules after a statement:
+        - Required in general (e.g. `x = 5` must be followed by `;`).
+        - NOT required if the statement just parsed ended in '}' (e.g. an
+          `if`/`while`/`for` block) - the brace is unambiguous on its own.
+        - NOT required if we're now sitting on '}' or EOF - i.e. this was
+          the last statement in a block, or the last statement in the file.
+        """
+
+        if self.check(TT.RBRACE, TT.EOF):
+            return
+        
+        previous = self.peek(-1)
+        if previous is not None and previous.type == TT.RBRACE:
+            return
+        
+        self.expect(TT.SEMICOLON)
+        
     # ------------------------------ entry point ----------------------------- #
 
     def parse(self) -> ast.ProgramNode:
         statements = []
         while not self.check(TT.EOF):
             statements.append(self.parse_statement())
-            if self.check(TT.SEMICOLON):
-                self.advance()
+            self._consume_statement_terminator()
         return ast.ProgramNode(statements)
     
     # ------------------------------ statements ------------------------------ #
 
-    def parse_statement(self):
+    def parse_statement(self) -> ast.Node:
         if self.check(TT.ID) and (peek1 := self.peek()) is not None and peek1.type == TT.COLON:
             return self.parse_var_decl()
 
@@ -114,7 +134,7 @@ class Parser:
     
     # ------------------------------ expressions ----------------------------- #
 
-    def parse_expression(self):
+    def parse_expression(self) -> ast.Node:
         return self.parse_assignment()
     
     def parse_assignment(self):
@@ -160,7 +180,6 @@ class Parser:
             else:
                 break
         return node
-        
     
     def parse_call(self, callee_node): # VVV callee_node should be an IdNode
         if not isinstance(callee_node, ast.IdNode):
@@ -179,7 +198,7 @@ class Parser:
     
     def parse_if(self) -> ast.IfNode:
         """
-        if cond {...}
+        if (cond) {...}
         else if (cond) {...} <- Zero or more else if blocks
         else {...} <- optional but must be last"""
         branches = []
@@ -206,6 +225,18 @@ class Parser:
                 break
 
         return ast.IfNode(branches, else_body)
+    
+    def parse_while(self) -> ast.WhileNode:
+        """
+        while (cond) {
+            ...}
+        """
+        self.expect(TT.WHILE)
+        self.expect(TT.LPAREN)
+        condition = self.parse_expression()
+        self.expect(TT.RPAREN)
+        body = self._parse_block()
+        return ast.WhileNode(condition, body)
     
     def parse_primary(self):
         handler = self.PRIMARY_HANDLERS.get(self.current.type)
@@ -247,112 +278,19 @@ class Parser:
         return expression
     
     def _parse_block(self):
-        statements = []
         self.expect(TT.LBRACE)
+        statements = []
         while not self.check(TT.RBRACE):
             if self.check(TT.EOF):
                 raise ParserError(
                     f'Unterminated block, expected \'}}\' but reached end of input '
                     f'at {self.current.line},{self.current.column}'
                 )
-            statements.append(self.parse_expression())
-            if self.check(TT.SEMICOLON): self.advance()
+            statements.append(self.parse_statement())
+            self._consume_statement_terminator()
         self.expect(TT.RBRACE)
         return statements
     
     
 def parse(tokens: list[Token]) -> ast.ProgramNode:
     return Parser(tokens).parse()
-
-# ---------------------------------------------------------------------------- #
-#                                    Testing                                   #
-# ---------------------------------------------------------------------------- #
-
-if __name__ == '__main__':
-    def tok(type_, value=None, line=1, col=1):
-        return Token(type_, value, line, col)
-    
-    
-    def run(name, tokens) -> ast.ProgramNode:
-        print('\n' + '='*50)
-        print(f'{name}')
-        tokens = tokens + [tok(TT.EOF)]
-        try:
-            result = Parser(tokens).parse()
-            print(result)
-            return result
-        except ParserError as e:
-            print("ParseError:", e)
-            return ast.ProgramNode([Token(TT.EOF, None, -1, -1)])
-    
-    # ------------------------------ basic tests ----------------------------- #
-   
-    run("2 + 3 * 2", [
-        tok(TT.INT, 2), tok(TT.PLUS, '+'), tok(TT.INT, 3), tok(TT.STAR, '*'), tok(TT.INT, 2)
-    ])
-    
-    run("a && b && c", [
-        tok(TT.ID, 'a'), tok(TT.AND, '&&'),
-        tok(TT.ID, 'b'), tok(TT.AND, '&&'),
-        tok(TT.ID, 'c'),
-    ])
-    
-    run("-5 + 3", [
-        tok(TT.MINUS, '-'), tok(TT.INT, 5), tok(TT.PLUS, '+'), tok(TT.INT, 3)
-    ])
-    
-    run("!TRUE && FALSE", [
-        tok(TT.NOT, '!'), tok(TT.BOOL, True), tok(TT.AND, '&&'), tok(TT.BOOL, False)
-    ])
-    
-    run("x = 5", [
-        tok(TT.ID, 'x'), tok(TT.ASSIGN, '='), tok(TT.INT, 5)
-    ])
-    
-    run("x = y = 5", [
-        tok(TT.ID, 'x'), tok(TT.ASSIGN, '='),
-        tok(TT.ID, 'y'), tok(TT.ASSIGN, '='),
-        tok(TT.INT, 5)
-    ])
-    
-    run("x: int = 5", [
-        tok(TT.ID, 'x'), tok(TT.COLON, ':'), tok(TT.INT_TYPE_HINT, 'int'),
-        tok(TT.ASSIGN, '='), tok(TT.INT, 5)
-    ])
-    
-    run("(4 * 2.2 + y * 3.3) && 0", [
-        tok(TT.LPAREN, '('),
-        tok(TT.INT, 4), tok(TT.STAR, '*'), tok(TT.FLOAT, 2.2),
-        tok(TT.PLUS, '+'),
-        tok(TT.ID, 'y'), tok(TT.STAR, '*'), tok(TT.FLOAT, 3.3),
-        tok(TT.RPAREN, ')'),
-        tok(TT.AND, '&&'), tok(TT.INT, 0)
-    ])
-    
-    run("x++", [
-        tok(TT.ID, 'x'), tok(TT.INCREMENT, '++')
-    ])
-    
-    run("//invalid target\n5 = 3", [
-        tok(TT.INT, 5), tok(TT.ASSIGN, '='), tok(TT.INT, 3)
-    ])
-    
-    run("2 + 3; x = 5", [
-        tok(TT.INT, 2), tok(TT.PLUS, '+'), tok(TT.INT, 3), tok(TT.SEMICOLON, ';'),
-        tok(TT.ID, 'x'), tok(TT.ASSIGN, '='), tok(TT.INT, 5)
-    ])
-
-    # ------------------------ test lexer with parser ------------------------ #
-
-    from lexer import Lexer
-
-    test = """
-    x: int = 3;
-    y: float = 3.5;
-    z: float = 2 * x + y;
-    // comment
-    x && y || !TRUE;
-    """
-
-    l = Lexer(test)
-    run(test, l.tokenize())

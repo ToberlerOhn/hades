@@ -75,8 +75,10 @@ class TT(Enum):
 	COMMA     = auto() # ,
 
 	# --------------------------------- keywords -------------------------------- #
-	IF   = auto() # if
-	ELSE = auto() # else
+	IF    = auto() # if
+	ELSE  = auto() # else
+	WHILE = auto() # while
+	FOR   = auto() # for
 
 	EOF = auto()
 

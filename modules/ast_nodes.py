@@ -108,6 +108,22 @@ class IfNode:
 
     def __repr__(self):
         return f'IfNode(branches={self.branches!r}, else_body = {self.else_body!r})'
+    
+@dataclass
+class WhileNode:
+    condition: Node
+    body: list[any]
+
+    def __repr__(self):
+        return f'WhileNode({self.condition!r}, {self.body!r})'
+
+@dataclass
+class ForNode:
+    init: Node
+    testExpression: Node
+    updateStatement: Node
+
+
 
 @dataclass
 class CallNode:
