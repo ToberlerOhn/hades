@@ -27,6 +27,7 @@ class TT(Enum):
 	BOOL  = auto() # TRUE | FALSE
 	STR   = auto()
 	ID    = auto()
+	LIST  = auto()
 
 	# --------------------------- variable type hints --------------------------- #
 
@@ -59,7 +60,18 @@ class TT(Enum):
 	STAR      = auto() #\*
 	SLASH     = auto() #\/\/
 	PERCENT   = auto() # %
-	ASSIGN    = auto() # =
+
+	# assignment operators
+
+	ASSIGN     = auto() #   =
+	PLUS_EQ    = auto() #   +=
+	MINUS_EQ   = auto() #   -=
+	STAR_EQ    = auto() # \ *=
+	SLASH_EQ   = auto() #   /=
+	PERCENT_EQ = auto() #   %=
+	AND_EQ     = auto() #   &&=
+	OR_EQ      = auto() #   ||=
+	XOR_EQ     = auto() #   ^^=
 
 	# --------------------------------- grouping --------------------------------- #
 	LPAREN   = auto() # (

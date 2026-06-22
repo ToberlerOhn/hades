@@ -78,6 +78,18 @@ class Interpreter:
             TT.DECREMENT: lambda o: o - 1
         }
 
+        self.ASSIGN_OPS: dict[TT, callable] = {
+            TT.ASSIGN    : lambda lhs, rhs:                    rhs,
+            TT.PLUS_EQ   : lambda lhs, rhs: lhs +              rhs,
+            TT.MINUS_EQ  : lambda lhs, rhs: lhs -              rhs,
+            TT.STAR_EQ   : lambda lhs, rhs: lhs *              rhs,
+            TT.SLASH_EQ  : lambda lhs, rhs: lhs /              rhs,
+            TT.PERCENT_EQ: lambda lhs, rhs: lhs %              rhs,
+            TT.AND_EQ    : lambda lhs, rhs: bool(lhs) & bool(  rhs),
+            TT.OR_EQ     : lambda lhs, rhs: bool( lhs) | bool( rhs),
+            TT.XOR_EQ    : lambda lhs, rhs: bool(lhs) ^ bool(  rhs)
+        }
+
         self.BUILTINS: dict[str, callable] = {
             'print': self.__print__
         }
@@ -105,12 +117,25 @@ class Interpreter:
         return value
     
     def _eval_assign(self, node: ast.AssignNode):
-        value = self.evaluate(node.value)
+        rhs_value = self.evaluate(node.value)
+
+        func = self.ASSIGN_OPS.get(node.assign_token.type)
+        if func is None:
+            raise InterpreterError(f'Unknown assigner \'{node.assign_token.value}\'')
         try:
-            self.scope.set(node.name_token.value, value)
+            current_value = self.scope.get(node.name_token.value)
         except KeyError:
-            raise InterpreterError(f'Cannot assign undeclared variable \'{node.name_token.value}\'', node.name_token)
-        return value
+            raise InterpreterError(f'Cannot assign to undeclared variable \'{node.name_token.value}\'', node.name_token)
+        
+        try:
+            new_value = func(current_value, rhs_value)
+        except TypeError as e:
+            raise InterpreterError(f'Invalid operand types for {node.assign_token.type.name}: '
+                                   f'{type(current_value).__name__} and {type(rhs_value).__name__}',
+                                   node.assign_token) from e
+        
+        self.scope.set(node.name_token.value, new_value)
+        return new_value
     
     def _eval_if(self, node: ast.IfNode):
         for condition, body in node.branches:

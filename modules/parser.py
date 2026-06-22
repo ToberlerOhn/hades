@@ -36,7 +36,10 @@ class Parser:
             TT.FOR  : self.parse_for,
         }
 
-        self.TYPE_HINT_TTs = (TT.INT_TYPE_HINT, TT.FLOAT_TYPE_HINT, TT.STR_TYPE_HINT, TT.BOOL_TYPE_HINT)
+        self.TYPE_HINT_TTs = (TT.INT_TYPE_HINT, 
+                              TT.FLOAT_TYPE_HINT, 
+                              TT.STR_TYPE_HINT, 
+                              TT.BOOL_TYPE_HINT)
 
     # ------------------------- pre-parsing variables ------------------------ #
 
@@ -53,6 +56,16 @@ class Parser:
         TT.PLUS : 5, TT.MINUS: 5,
         TT.STAR : 6, TT.SLASH: 6, TT.PERCENT : 6,
     }
+
+    ASSIGN_OPS = (TT.ASSIGN, 
+                  TT.PLUS_EQ, 
+                  TT.MINUS_EQ, 
+                  TT.STAR_EQ, 
+                  TT.SLASH_EQ, 
+                  TT.PERCENT_EQ, 
+                  TT.AND_EQ, 
+                  TT.OR_EQ, 
+                  TT.XOR_EQ)
 
     # ---------------------------- helper methods ---------------------------- #
 
@@ -140,12 +153,13 @@ class Parser:
     
     def parse_assignment(self):
         left = self.parse_binary()
-        if self.check(TT.ASSIGN):
+        if self.check(*self.ASSIGN_OPS):
             if not isinstance(left, ast.IdNode):
                 raise ParserError(f'Invalid assignment target: {left!r}')
+            assign_token = self.current
             self.advance()
             right = self.parse_assignment()
-            return ast.AssignNode(left.token, right)
+            return ast.AssignNode(left.token, assign_token, right)
         return left
     
     def parse_binary(self, min_precedence: int =1):

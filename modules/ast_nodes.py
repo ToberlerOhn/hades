@@ -83,10 +83,11 @@ class PostfixOpNode:
 @dataclass
 class AssignNode:
     name_token: Token
+    assign_token: Token
     value: any
 
     def __repr__(self):
-        return f'AssignNode({self.name_token.value!r} = {self.value!r})'
+        return f'AssignNode({self.name_token.value!r}, {self.assign_token.type}, {self.value!r})'
     
 @dataclass
 class VarDeclNode:

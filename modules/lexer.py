@@ -155,7 +155,8 @@ class Lexer:
 				return self.read_id()
 			
 			# --------------------------- 3 character tokens -------------------------- #
-			# TYPE_EQ (===), TYPE_NEQ (!==)
+			# TYPE_EQ (===), TYPE_NEQ (!==),
+			# AND_EQ (&&=), OR_EQ (||=), XOR_EQ (^^=)
 
 			if self.current == self.peek() == self.peek(2) == '=':
 				self.advance(3)
@@ -165,9 +166,23 @@ class Lexer:
 				self.advance(3)
 				return Token(TT.TYPE_NEQ, '!==', start_line, start_col)
 			
+			if self.current == self.peek() == '&' and self.peek(2) == '=':
+				self.advance(3)
+				return Token(TT.AND_EQ, '&&=', start_line, start_col)
+			
+			if self.current == self.peek() == '|' and self.peek(2) == '=':
+				self.advance(3)
+				return Token(TT.OR_EQ, '||=', start_line, start_col)
+			
+			if self.current == self.peek() == '^' and self.peek(2) == '=':
+				self.advance(3)
+				return Token(TT.XOR_EQ, '^^=', start_line, start_col)
+			
 			# --------------------------- 2 character tokens -------------------------- #
-			# EQ (==), NEQ (!=), GTE (>=), LTE (<=), AND (&&), OR (||),
-			# XOR (^^), INCREMENT (++), DECREMENT (--)
+			# EQ (==), NEQ (!=), GTE (>=), LTE (<=), 
+			# PLUS_EQ (+=), MINUS_EQ (-=), STAR_EQ (*=), SLASH_EQ (/=), PERCENT_EQ (%=)
+			# AND (&&), OR (||), XOR (^^), 
+			# INCREMENT (++), DECREMENT (--),
 
 			if self.current == self.peek() == '=':
 				self.advance(2)
@@ -184,6 +199,26 @@ class Lexer:
 			if self.current == '<' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.LTE, '<=', start_line, start_col)
+			
+			if self.current == '+' and self.peek() == '=':
+				self.advance(2)
+				return Token(TT.PLUS_EQ, '+=', start_line, start_col)
+			
+			if self.current == '-' and self.peek() == '=':
+				self.advance(2)
+				return Token(TT.MINUS_EQ, '-=', start_line, start_col)
+			
+			if self.current == '*' and self.peek() == '=':
+				self.advance(2)
+				return Token(TT.STAR_EQ, '*=', start_line, start_col)
+			
+			if self.current == '/' and self.peek() == '=':
+				self.advance(2)
+				return Token(TT.SLASH_EQ, '/=', start_line, start_col)
+			
+			if self.current == '%' and self.peek() == '=':
+				self.advance(2)
+				return Token(TT.PERCENT_EQ, '%=', start_line, start_col)
 			
 			if self.current == self.peek() == '&':
 				self.advance(2)
