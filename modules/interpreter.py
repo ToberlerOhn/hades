@@ -123,8 +123,11 @@ class Interpreter:
     def _eval_while(self, node: ast.WhileNode):
         condition, body = node.condition, node.body
         result = None
+        previous_scope = self.scope
+        self.scope = Scope(parent=previous_scope)
         while self._truthy(self.evaluate(condition)):
             result = self._eval_statements(body)
+        self.scope = previous_scope
         return result
     
     def _eval_for(self, node: ast.ForNode):
