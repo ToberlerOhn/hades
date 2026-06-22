@@ -115,33 +115,25 @@ class Interpreter:
     def _eval_if(self, node: ast.IfNode):
         for condition, body in node.branches:
             if self._truthy(self.evaluate(condition)):
-                return self._eval_statements(body)
+                return self._eval_block(body)
         if node.else_body is not None:
-            return self._eval_statements(node.else_body)
+            return self._eval_block(node.else_body)
         return None
     
     def _eval_while(self, node: ast.WhileNode):
         condition, body = node.condition, node.body
         result = None
-        previous_scope = self.scope
-        self.scope = Scope(parent=previous_scope)
         while self._truthy(self.evaluate(condition)):
-            result = self._eval_statements(body)
-        self.scope = previous_scope
+            result = self._eval_block(body)
         return result
     
     def _eval_for(self, node: ast.ForNode):
         init, test, update, body = node.init, node.testExpression, node.updateStatement, node.body
-        previous_scope = self.scope
-        self.scope = Scope(parent=previous_scope)
-        try:
-            result = self.evaluate(init)
-            while self._truthy(self.evaluate(test)):
-                result = self._eval_statements(body)
-                self.evaluate(update)
-            return result
-        finally:
-            self.scope = previous_scope
+        result = self.evaluate(init)
+        while self._truthy(self.evaluate(test)):
+            result = self._eval_block(body)
+            self.evaluate(update)
+        return result
 
     def _eval_statements(self, statements: list):
         result = None
@@ -250,6 +242,14 @@ class Interpreter:
         return str(value)
     
     # --------------------------- helper functions --------------------------- #
+
+    def _eval_block(self, statements: list):
+        previous_scope = self.scope
+        self.scope = Scope(previous_scope)
+        try:
+            return self._eval_statements(statements)
+        finally:
+            self.scope = previous_scope
 
     @staticmethod
     def _truthy(value) -> bool:

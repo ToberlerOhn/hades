@@ -1,11 +1,15 @@
-for (i: int = 0; i < 5; i++) {
-    print(i)
+// for (i: int = 0; i < 5; i++) {
+//     print(i)
+// }
+// i: int = 0;
+// while (i < 5) {
+//     j: int = 3;
+//     print(i);
+//     i++
+// }
+k: float = 3.3;
+if (k > 3) {
+    m: str = 'agsdaga';
 }
-i: int = 0;
-while (i < 5) {
-    j: int = 3;
-    print(i);
-    i++
-}
-j: int = 5;
-print(j)
+// print(j);
+print(m)
