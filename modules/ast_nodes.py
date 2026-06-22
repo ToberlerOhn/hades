@@ -122,6 +122,10 @@ class ForNode:
     init: Node
     testExpression: Node
     updateStatement: Node
+    body: list[any]
+
+    def __repr__(self):
+        return f'ForNode({self.init}, {self.testExpression}, {self.updateStatement}, body={self.body!r})'
 
 
 

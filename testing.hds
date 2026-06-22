@@ -1,6 +1,8 @@
-x: int = 3;
-y: float = x + 0.2;
-while (x <= 4) {
-    x = x + 0.1;
-    print(x)
+for (i: int = 0; i < 5; i++) {
+    print(i)
+}
+i = 0;
+while (i < 5) {
+    print(i);
+    i++
 }

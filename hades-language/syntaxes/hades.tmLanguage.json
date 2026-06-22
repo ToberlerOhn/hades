@@ -24,7 +24,7 @@
       "patterns": [
         {
           "name": "keyword.control.hades",
-          "match": "\\b(if|else|while)\\b"
+          "match": "\\b(if|else|while|for)\\b"
         }
       ]
     },

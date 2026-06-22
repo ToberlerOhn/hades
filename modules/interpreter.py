@@ -45,6 +45,7 @@ class Interpreter:
             ast.CallNode     : self._eval_call,
             ast.IfNode       : self._eval_if,
             ast.WhileNode    : self._eval_while,
+            ast.ForNode      : self._eval_for,
         }
 
         self.BINARY_OPS: dict[TT, callable] = {
@@ -124,6 +125,15 @@ class Interpreter:
         result = None
         while self._truthy(self.evaluate(condition)):
             result = self._eval_statements(body)
+        return result
+    
+    def _eval_for(self, node: ast.ForNode):
+        init, test, update, body = node.init, node.testExpression, node.updateStatement, node.body
+        result = None
+        result = self.evaluate(init)
+        while self._truthy(self.evaluate(test)):
+            result = self._eval_statements(body)
+            self.evaluate(update)
         return result
 
     def _eval_statements(self, statements: list):

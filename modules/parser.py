@@ -31,8 +31,9 @@ class Parser:
         }
 
         self.STATEMENT_HANDLERS: dict[TT, callable] = {
-            TT.IF: self.parse_if,
+            TT.IF   : self.parse_if,
             TT.WHILE: self.parse_while,
+            TT.FOR  : self.parse_for,
         }
 
         self.TYPE_HINT_TTs = (TT.INT_TYPE_HINT, TT.FLOAT_TYPE_HINT, TT.STR_TYPE_HINT, TT.BOOL_TYPE_HINT)
@@ -181,7 +182,7 @@ class Parser:
                 break
         return node
     
-    def parse_call(self, callee_node): # VVV callee_node should be an IdNode
+    def parse_call(self, callee_node) -> ast.CallNode:
         if not isinstance(callee_node, ast.IdNode):
             raise ParserError(f'Cannot call non-identifier expression: {callee_node!r}')
         
@@ -233,10 +234,27 @@ class Parser:
         """
         self.expect(TT.WHILE)
         self.expect(TT.LPAREN)
-        condition = self.parse_expression()
+        condition = self.parse_statement()
         self.expect(TT.RPAREN)
         body = self._parse_block()
         return ast.WhileNode(condition, body)
+    
+    def parse_for(self) -> ast.ForNode:
+        """
+        for (init; test; update) {
+            ...}
+        """
+        self.expect(TT.FOR)
+        self.expect(TT.LPAREN)
+        init   = self.parse_statement()
+        self.expect(TT.SEMICOLON)
+        test   = self.parse_statement()
+        self.expect(TT.SEMICOLON)
+        update = self.parse_statement()
+        self.expect(TT.RPAREN)
+        body   = self._parse_block()
+        return ast.ForNode(init, test, update, body)
+
     
     def parse_primary(self):
         handler = self.PRIMARY_HANDLERS.get(self.current.type)
