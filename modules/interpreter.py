@@ -108,7 +108,7 @@ class Interpreter:
         value = self.evaluate(node.value)
         try:
             self.scope.set(node.name_token.value, value)
-        except:
+        except KeyError:
             raise InterpreterError(f'Cannot assign undeclared variable \'{node.name_token.value}\'', node.name_token)
         return value
     
@@ -129,12 +129,16 @@ class Interpreter:
     
     def _eval_for(self, node: ast.ForNode):
         init, test, update, body = node.init, node.testExpression, node.updateStatement, node.body
-        result = None
-        result = self.evaluate(init)
-        while self._truthy(self.evaluate(test)):
-            result = self._eval_statements(body)
-            self.evaluate(update)
-        return result
+        previous_scope = self.scope
+        self.scope = Scope(parent=previous_scope)
+        try:
+            result = self.evaluate(init)
+            while self._truthy(self.evaluate(test)):
+                result = self._eval_statements(body)
+                self.evaluate(update)
+            return result
+        finally:
+            self.scope = previous_scope
 
     def _eval_statements(self, statements: list):
         result = None

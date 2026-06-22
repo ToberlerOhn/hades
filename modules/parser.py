@@ -234,7 +234,7 @@ class Parser:
         """
         self.expect(TT.WHILE)
         self.expect(TT.LPAREN)
-        condition = self.parse_statement()
+        condition = self.parse_expression()
         self.expect(TT.RPAREN)
         body = self._parse_block()
         return ast.WhileNode(condition, body)

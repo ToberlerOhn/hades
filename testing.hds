@@ -1,8 +1,10 @@
 for (i: int = 0; i < 5; i++) {
     print(i)
 }
-i = 0;
+i: int = 0;
 while (i < 5) {
+    j: int = 3;
     print(i);
     i++
 }
+print(j)
