@@ -112,11 +112,12 @@ class IfNode:
     
 @dataclass
 class WhileNode:
+    is_do: bool
     condition: Node
     body: list[any]
 
     def __repr__(self):
-        return f'WhileNode({self.condition!r}, {self.body!r})'
+        return f'WhileNode(do={self.is_do}, {self.condition!r}, {self.body!r})'
 
 @dataclass
 class ForNode:

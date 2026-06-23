@@ -112,6 +112,7 @@ class Lexer:
 
 			'if'   : TT.IF,
 			'else' : TT.ELSE,
+			'do'   : TT.DO,
 			'while': TT.WHILE,
 			'for'  : TT.FOR,
 		}

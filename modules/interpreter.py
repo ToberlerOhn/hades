@@ -147,8 +147,11 @@ class Interpreter:
         return None
     
     def _eval_while(self, node: ast.WhileNode):
+        is_do = node.is_do
         condition, body = node.condition, node.body
         result = None
+        if is_do:
+            result = self._eval_block(body)
         while self._truthy(self.evaluate(condition)):
             result = self._eval_block(body)
         return result

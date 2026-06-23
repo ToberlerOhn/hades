@@ -10,7 +10,8 @@ const vscode = require('vscode');
 function activate(context) {
     // Basic documentation database for Hades
     const hadesDocs = {
-        'print': '### `print\nPrints to terminal.',
+        'print': '### `print`\nPrints to terminal.'           ,
+        'type' : '### `type`\nReturns the type of the object.',
     };
 
     // Register the hover provider for the 'hades' language

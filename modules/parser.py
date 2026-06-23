@@ -32,6 +32,7 @@ class Parser:
 
         self.STATEMENT_HANDLERS: dict[TT, callable] = {
             TT.IF   : self.parse_if,
+            TT.DO   : self.parse_while,
             TT.WHILE: self.parse_while,
             TT.FOR  : self.parse_for,
         }
@@ -243,15 +244,29 @@ class Parser:
     
     def parse_while(self) -> ast.WhileNode:
         """
+        do {...}
+        while (cond)
+
+        OR
+
         while (cond) {
             ...}
         """
+        is_do = self.check(TT.DO)
+        if is_do:
+            self.expect(TT.DO)
+            body = self._parse_block()
+            self.expect(TT.WHILE)
+            self.expect(TT.LPAREN)
+            condition = self.parse_expression()
+            self.expect(TT.RPAREN)
+            return ast.WhileNode(is_do, condition, body)
         self.expect(TT.WHILE)
         self.expect(TT.LPAREN)
         condition = self.parse_expression()
         self.expect(TT.RPAREN)
         body = self._parse_block()
-        return ast.WhileNode(condition, body)
+        return ast.WhileNode(is_do, condition, body)
     
     def parse_for(self) -> ast.ForNode:
         """

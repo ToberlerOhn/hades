@@ -89,6 +89,7 @@ class TT(Enum):
 	# --------------------------------- keywords -------------------------------- #
 	IF    = auto() # if
 	ELSE  = auto() # else
+	DO    = auto() # do
 	WHILE = auto() # while
 	FOR   = auto() # for
 
