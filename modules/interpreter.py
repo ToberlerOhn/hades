@@ -26,6 +26,10 @@ class InterpreterError(Exception):
 #                                  Interpreter                                 #
 # ---------------------------------------------------------------------------- #
 
+class ReturnSignal(Exception):
+    def __init__(self, value):
+        self.value = value
+
 class Interpreter:
 
     def __init__(self):
@@ -46,6 +50,8 @@ class Interpreter:
             ast.IfNode       : self._eval_if,
             ast.WhileNode    : self._eval_while,
             ast.ForNode      : self._eval_for,
+            ast.FuncNode     : self._eval_func_def,
+            ast.ReturnNode   : self._eval_return,
         }
 
         self.BINARY_OPS: dict[TT, callable] = {
@@ -163,22 +169,79 @@ class Interpreter:
             result = self._eval_block(body)
             self.evaluate(update)
         return result
+    
+    def _eval_func_def(self, node: ast.Function) -> None:
+       if self.scope.has(node.name):
+           raise InterpreterError(f'Cannot redefine \'{node.name}\'')
+       function = ast.Function(
+           name=node.name,
+           parameters=node.parameters,
+           return_type=node.return_type,
+           body=node.body,
+           closure_scope=self.scope
+       )
+       self.scope.declare(node.name, function)
+       return
+        
+    def _eval_call(self, node: ast.CallNode):
+        name = node.callee_token.value
+        args = [self.evaluate(arg) for arg in node.args]
+        builtin = self.BUILTINS.get(name)
+        if builtin is not None:
+            return builtin(args, node.callee_token)
+        
+        try:
+            target = self.scope.get(name)
+        except KeyError:
+            raise InterpreterError(f'Undefined function \'{name}\'', node.callee_token)
+        if not isinstance(target, ast.Function):
+            raise InterpreterError(f'\'{name}\' is not callable', node.callee_token)
+        
+        return self._call_function(target, args, node.callee_token) 
+    
+    def _call_function(self, function: ast.Function, args: list, call_token: Token):
+        if len(args) != len(function.parameters):
+            raise InterpreterError(f'\'{function.name}\' expects {len(function.parameters)} \
+                                   argument{"s" if len(function.parameters) != 1 else ""}, but got {len(args)}',
+                                   call_token)
+        previous_scope = self.scope
+        self.scope = Scope(previous_scope)
+
+        for (name, th), arg_val in zip(function.parameters, args):
+            self._check_type_hint(arg_val, th, name)
+            self.scope.declare(name.value, arg_val)
+        
+        try:
+            try:
+                self._eval_statements(function.body)
+                return_value = None
+            except ReturnSignal as r:
+                return_value = r.value
+        finally:
+            self.scope = previous_scope
+
+        if function.return_type.type != TT.NOTHING_TYPE_HINT:
+            if return_value is None:
+                print(f'DEBUG: function.name={function.name!r}, return_type={function.return_type!r}')
+                raise InterpreterError(
+                    f'Function \'{function.name}\' must return a value '
+                    f'(declared: {function.return_type.type.name}, but execution '
+                    f'reached the end without an explicit return)',
+                    call_token
+                )
+            self._check_type_hint(return_value, function.return_type, call_token)
+
+        return return_value
+
+    def _eval_return(self, node: ast.ReturnNode):
+        value = self.evaluate(node.value) if node.value is not None else None
+        raise ReturnSignal(value)
 
     def _eval_statements(self, statements: list):
         result = None
         for statement in statements:
             result = self.evaluate(statement)
         return result
-    
-    def _eval_call(self, node: ast.CallNode):
-        name = node.callee_token.value
-        func = self.BUILTINS.get(name)
-        if func is None:
-            raise InterpreterError(f'Undefined function \'{name}\'', node.callee_token)
-        
-        args = [self.evaluate(arg) for arg in node.args]
-        return func(args, node.callee_token)
-    
     # ------------------------------- literals ------------------------------- #
     
     def _eval_number(self, node: ast.NumberNode):
@@ -309,10 +372,11 @@ class Interpreter:
 
     def _check_type_hint(self, value, type_hint_token: Token, name_token: Token):
         expected = {
-            TT.INT_TYPE_HINT  : int,
-            TT.FLOAT_TYPE_HINT: float,
-            TT.BOOL_TYPE_HINT : bool,
-            TT.STR_TYPE_HINT  : str,
+            TT.INT_TYPE_HINT     :      int   ,
+            TT.FLOAT_TYPE_HINT   :      float ,
+            TT.BOOL_TYPE_HINT    :      bool  ,
+            TT.STR_TYPE_HINT     :      str   ,
+            TT.NOTHING_TYPE_HINT : type(None ),
         }.get(type_hint_token.type)
 
         if expected is None:

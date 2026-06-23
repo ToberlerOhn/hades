@@ -6,7 +6,8 @@
 
 from dataclasses import dataclass
 from typing import Any as any
-from .tokens import Token
+from .tokens import Token, TT
+from .scope import Scope
 
 type Node = (NumberNode | BoolNode | StringNode | IdNode | \
 BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
@@ -130,6 +131,37 @@ class ForNode:
         return f'ForNode({self.init}, {self.testExpression}, {self.updateStatement}, body={self.body!r})'
 
 
+# ---------------------------------------------------------------------------- #
+#                                  Structures                                  #
+# ---------------------------------------------------------------------------- #
+
+@dataclass
+class FuncNode:
+    """Define a function"""
+    name: str
+    parameters: list[Token]
+    return_type: Token
+    body: list[any]
+
+    def __repr__(self):
+        return f'FuncDefNode({self.name}, {self.parameters!r} => {self.return_type}, body={self.body!r})'
+    
+@dataclass
+class Function:
+    name: str
+    parameters: list
+    return_type: Token
+    body: list
+    closure_scope: Scope
+
+@dataclass
+class ReturnNode:
+    """`=> expr;` or `=> nothing;`"""
+    keyword_token: Token
+    value: any
+
+    def __repr__(self):
+        return f'ReturnNode({self.value!r})'
 
 @dataclass
 class CallNode:

@@ -103,18 +103,20 @@ class Lexer:
 
 		# * Update later 
 		keywords: dict[str, TT] = {
-			'TRUE' : TT.BOOL,
-			'FALSE': TT.BOOL,
-			'_b'   : TT.BOOL_TYPE_HINT,
-			'int'  : TT.INT_TYPE_HINT,
-			'str'  : TT.STR_TYPE_HINT,
-			'float': TT.FLOAT_TYPE_HINT,
+			'TRUE'    : TT.BOOL              ,
+			'FALSE'   : TT.BOOL              ,
+			'int'     : TT.INT_TYPE_HINT     ,
+			'float'   : TT.FLOAT_TYPE_HINT   ,
+			'bool'    : TT.BOOL_TYPE_HINT    ,
+			'str'     : TT.STR_TYPE_HINT     ,
+			'nothing' : TT.NOTHING_TYPE_HINT ,
 
-			'if'   : TT.IF,
-			'else' : TT.ELSE,
-			'do'   : TT.DO,
-			'while': TT.WHILE,
-			'for'  : TT.FOR,
+			'if'    : TT.IF   ,
+			'else'  : TT.ELSE ,
+			'do'    : TT.DO   ,
+			'while' : TT.WHILE,
+			'for'   : TT.FOR  ,
+			'func'  : TT.FUNC ,
 		}
 
 		tokenType = keywords.get(id, TT.ID)
@@ -184,6 +186,7 @@ class Lexer:
 			# PLUS_EQ (+=), MINUS_EQ (-=), STAR_EQ (*=), SLASH_EQ (/=), PERCENT_EQ (%=)
 			# AND (&&), OR (||), XOR (^^), 
 			# INCREMENT (++), DECREMENT (--),
+			# RIGHT_ARROW (->), RIGHT_DOUBLE_ARROW (=>)
 
 			if self.current == self.peek() == '=':
 				self.advance(2)
@@ -240,6 +243,15 @@ class Lexer:
 			if self.current == self.peek() == '-':
 				self.advance(2)
 				return Token(TT.DECREMENT, '--', start_line, start_col)
+			
+			if self.current == '-' and self.peek() == '>':
+				self.advance(2)
+				return Token(TT.RIGHT_ARROW, '->', start_line, start_col)
+			
+			if self.current == '=' and self.peek() == '>':
+				self.advance(2)
+				return Token(TT.RIGHT_DOUBLE_ARROW, '=>', start_line, start_col)
+			
 			
 			# --------------------------- 1 character tokens -------------------------- #
 

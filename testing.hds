@@ -1,14 +1,4 @@
-print('With do/while');
-i: int = 1;
-do {
-    print(i);
-    i++
-} while (i < 10);
-
-
-print('With while');
-j: int = 1;
-while (j < 10) {
-    print(j);
-    j++
-}
+func add(a: int, b: int) => int {=> (a + b)}
+func log(msg: str) => nothing {print(msg)}
+print(add(2,3));
+log('hi')

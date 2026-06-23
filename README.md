@@ -12,7 +12,6 @@ Hades is a programming language created by Toby Paradise as a passion project.
 - Not required right after a block (`}`).
 - Not required right before the end of a block (`}`)
 
-
 ### Operators
 
 #### Arithmetic Operators
@@ -30,7 +29,7 @@ Hades is a programming language created by Toby Paradise as a passion project.
 |     Modulo     | `a % b`  |
 
 N.B.: Unary plus is equivalent to absolute value
-    : Exponentiation is not defined as an operator, but as a function `pow(a,b)`
+: Exponentiation is not defined as an operator, but as a function `pow(a,b)`
 
 #### Comparison Operators
 
@@ -69,19 +68,19 @@ N.B.: Unary plus is equivalent to absolute value
 #### Assignment Operators
 
 Assignment: `a = b`
-| Syntax      | Equivalence    |
-| :-----:     | :------:       |
-| `a += b`    | `a = a + b`    |
-| `a -= b`    | `a = a - b`    |
-| `a *= b`    | `a = a * b`    |
-| `a /= b`    | `a = a / b`    |
-| `a %= b`    | `a = a % b`    |
-| `a &&= b`   | `a = a && b`   |
+| Syntax | Equivalence |
+| :-----: | :------: |
+| `a += b` | `a = a + b` |
+| `a -= b` | `a = a - b` |
+| `a *= b` | `a = a * b` |
+| `a /= b` | `a = a / b` |
+| `a %= b` | `a = a % b` |
+| `a &&= b` | `a = a && b` |
 | `a \|\|= b` | `a = a \|\| b` |
-| `a ^^= b`   | `a = a ^^ b`   |
-| `a &= b`    | `a = a & b`    |
-| `a \|= b`   | `a = a \| b`   |
-| `a ^= b`    | `a = a ^ b`    |
+| `a ^^= b` | `a = a ^^ b` |
+| `a &= b` | `a = a & b` |
+| `a \|= b` | `a = a \| b` |
+| `a ^= b` | `a = a ^ b` |
 
 #### Operator Overloading
 
@@ -119,7 +118,7 @@ Operator overloading is used to redefine the use of an operator in a specific us
 |       Full name       | Definition name |
 | :-------------------: | :-------------: |
 |        nothing        |    `nothing`    |
-|        boolean        |      `_b`       |
+|        boolean        |     `bool`      |
 |        integer        |      `int`      |
 | floating point number |     `float`     |
 |        string         |      `str`      |
@@ -148,6 +147,7 @@ qux: record = "1, 1.5, 2, 2.33";
 ```
 func my_function(parameter1: type, paramter2: type...) => ReturnType {
     // function body goes here
+    => exp // returning
 };
 ```
 
@@ -260,6 +260,7 @@ while (condition) {
 ```
 
 Do-while loops first do the statement within brackets, then check the condition after. This means that a do-while loop is executed at least once, buta a while loop may not be executed at all.
+
 ```
 do {
     // code goes here
@@ -267,12 +268,15 @@ do {
 ```
 
 Here is code using both types of while loops that both output
+
 ```
 0
 1
 2
 ```
+
 using a while loop:
+
 ```
 i = 0;
 while (i < 3) {
@@ -280,7 +284,9 @@ while (i < 3) {
     i++;
 };
 ```
+
 using a do-while loop:
+
 ```
 i = 0;
 do {
@@ -306,6 +312,7 @@ for (i: int; [0, 1, 2] contains i) {
     print(i)
 }
 ```
+
 ## Control flow keywords
 
 ### Return
@@ -314,13 +321,13 @@ A `return` statement returns a value from a function. This exits out of the func
 
 ### Next
 
-A `next` statement jumps to the next iterable in the interation. For while loops, this means jumping to the end of the outermost bracket (e.g., where `i++` is). For for loops, this either goes to the next element of  the iterable or runs the next part of the definition (e..g, the `i++` of the loop definition). 
+A `next` statement jumps to the next iterable in the interation. For while loops, this means jumping to the end of the outermost bracket (e.g., where `i++` is). For for loops, this either goes to the next element of the iterable or runs the next part of the definition (e..g, the `i++` of the loop definition).
 
 ### Break
 
 A `break` statement exits a loop.
 
-### _goTo
+### \_goTo
 
 A `_goTo` statement goes to a specific label, which is defined at some point during the code.
 
@@ -333,7 +340,6 @@ if (elem == 'end') {
 END:
 // code goes here
 ```
-
 
 ## Truthiness
 

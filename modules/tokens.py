@@ -31,10 +31,11 @@ class TT(Enum):
 
 	# --------------------------- variable type hints --------------------------- #
 
-	FLOAT_TYPE_HINT = auto() # float
-	INT_TYPE_HINT   = auto() # int
-	BOOL_TYPE_HINT  = auto() # _b
-	STR_TYPE_HINT   = auto() # str
+	FLOAT_TYPE_HINT   = auto() # float
+	INT_TYPE_HINT     = auto() # int
+	BOOL_TYPE_HINT    = auto() # bool
+	STR_TYPE_HINT     = auto() # str
+	NOTHING_TYPE_HINT = auto() # nothing
 
 	# -------------------------------- comparisons ------------------------------- #
 	TYPE_EQ  = auto() #  ===
@@ -86,12 +87,17 @@ class TT(Enum):
 	COLON     = auto() # :
 	COMMA     = auto() # ,
 
+	# ------------------------------ other symbols ------------------------------ #
+	RIGHT_ARROW        = auto() # ->
+	RIGHT_DOUBLE_ARROW = auto() # =>
+
 	# --------------------------------- keywords -------------------------------- #
 	IF    = auto() # if
 	ELSE  = auto() # else
 	DO    = auto() # do
 	WHILE = auto() # while
 	FOR   = auto() # for
+	FUNC  = auto() # func
 
 	EOF = auto()
 
@@ -108,3 +114,4 @@ class Token:
 
 	def __repr__(self):
 		return f'Token({self.type}, {self.value!r}, {self.line}:{self.column})'
+	

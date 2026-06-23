@@ -22,25 +22,28 @@ class Parser:
         self.current = self.tokens[0]
 
         self.PRIMARY_HANDLERS: dict[TT, callable] = {
-            TT.INT   : self._parse_number,
-            TT.FLOAT : self._parse_number,
-            TT.BOOL  : self._parse_bool,
-            TT.STR   : self._parse_string,
-            TT.ID    : self._parse_identifier,
-            TT.LPAREN: self._parse_grouping,
+            TT.INT    : self._parse_number    ,
+            TT.FLOAT  : self._parse_number    ,
+            TT.BOOL   : self._parse_bool      ,
+            TT.STR    : self._parse_string    ,
+            TT.ID     : self._parse_identifier,
+            TT.LPAREN : self._parse_grouping  ,
         }
 
         self.STATEMENT_HANDLERS: dict[TT, callable] = {
-            TT.IF   : self.parse_if,
-            TT.DO   : self.parse_while,
-            TT.WHILE: self.parse_while,
-            TT.FOR  : self.parse_for,
+            TT.IF                 : self.parse_if       ,
+            TT.DO                 : self.parse_while    ,
+            TT.WHILE              : self.parse_while    ,
+            TT.FOR                : self.parse_for      ,
+            TT.FUNC               : self.parse_func_def ,
+            TT.RIGHT_DOUBLE_ARROW : self.parse_return   ,
         }
 
         self.TYPE_HINT_TTs = (TT.INT_TYPE_HINT, 
                               TT.FLOAT_TYPE_HINT, 
                               TT.STR_TYPE_HINT, 
-                              TT.BOOL_TYPE_HINT)
+                              TT.BOOL_TYPE_HINT,
+                              TT.NOTHING_TYPE_HINT)
 
     # ------------------------- pre-parsing variables ------------------------ #
 
@@ -105,10 +108,14 @@ class Parser:
         """
 
         if self.check(TT.RBRACE, TT.EOF):
+            if self.peek() == TT.SEMICOLON:
+                self.expect(TT.SEMICOLON)
             return
         
         previous = self.peek(-1)
         if previous is not None and previous.type == TT.RBRACE:
+            if self.check(TT.SEMICOLON):
+                self.expect(TT.SEMICOLON)
             return
         
         self.expect(TT.SEMICOLON)
@@ -283,8 +290,43 @@ class Parser:
         self.expect(TT.RPAREN)
         body   = self._parse_block()
         return ast.ForNode(init, test, update, body)
-
     
+    def parse_func_def(self) -> ast.FuncNode:
+        self.expect(TT.FUNC)
+        name = self.current
+        self.advance()
+        self.expect(TT.LPAREN)
+        parameters = []
+        if not self.check(TT.RPAREN):
+            parameters.append(self._parse_param())
+            while self.check(TT.COMMA):
+                self.advance()
+                parameters.append(self._parse_param())
+        self.expect(TT.RPAREN)
+        self.expect(TT.RIGHT_DOUBLE_ARROW)
+        if not self.check(*self.TYPE_HINT_TTs):
+            raise ParserError(f'Invalid return type hint in {name.value} function definition')
+        return_type = self.current
+        self.advance()
+        body = self._parse_block()
+        return ast.FuncNode(name.value, parameters, return_type, body)
+    
+    def _parse_param(self):
+        param_name = self.expect(TT.ID)
+        self.expect(TT.COLON)
+        if not self.check(*self.TYPE_HINT_TTs):
+            raise ParserError( f'Invalid parameter type hint at {self.current.line}:{self.current.column}')
+        type_hint = self.current
+        self.advance()
+        return (param_name, type_hint)
+    
+    def parse_return(self):
+        keyword = self.expect(TT.RIGHT_DOUBLE_ARROW)
+        if self.check(TT.NOTHING_TYPE_HINT):
+            return ast.ReturnNode(keyword, None)
+        value = self.parse_expression()
+        return ast.ReturnNode(keyword, value)
+        
     def parse_primary(self):
         handler = self.PRIMARY_HANDLERS.get(self.current.type)
         if handler is None:

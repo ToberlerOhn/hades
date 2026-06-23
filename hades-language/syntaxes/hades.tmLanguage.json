@@ -24,7 +24,7 @@
       "patterns": [
         {
           "name": "keyword.control.hades",
-          "match": "\\b(if|else|do|while|for)\\b"
+          "match": "\\b(if|else|do|while|for|func|return)\\b"
         }
       ]
     },
@@ -33,7 +33,7 @@
       "patterns": [
         {
           "name": "storage.type.hades",
-          "match": "\\b(int|float|bool|str)\\b"
+          "match": "\\b(int|float|bool|str|nothing)\\b"
         }
       ]
     },
