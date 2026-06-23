@@ -118,7 +118,10 @@ class Interpreter:
         return result
         
     def _eval_vardecl(self, node: ast.VarDeclNode):
-        value = self.evaluate(node.value)
+        if node.value == None:
+            value = None
+        else:
+            value = self.evaluate(node.value)
         self._check_type_hint(value, node.type_hint, node.name_token)
         self.scope.declare(node.name_token.value, value)
         return value

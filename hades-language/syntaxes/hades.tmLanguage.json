@@ -67,6 +67,10 @@
         {
           "name": "keyword.operator.hades",
           "match": "\\+|-\\*|/|%|&|\\|^|!|=|>|<"
+        },
+        {
+          "name": "keyword.other.hades",
+          "match": ",|:"
         }
       ]
     },

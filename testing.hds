@@ -1,4 +1,4 @@
-func add(a: int, b: int) => int {=> (a + b)}
-func log(msg: str) => nothing {print(msg)}
-print(add(2,3));
-log('hi')
+func p_print(_1: str, _2: str) => nothing {
+    print(_1); print(_2)
+}
+p_print('hello', 'world')

@@ -290,6 +290,7 @@ class Lexer:
 		while True:
 			token = self.get_next_token()
 			tokens.append(token)
+			# DEBUGGING: print(token)
 			if token.type == TT.EOF:
 				break
 		return tokens

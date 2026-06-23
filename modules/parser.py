@@ -149,6 +149,8 @@ class Parser:
             raise ParserError(f'Expected a type hint, but got a {type_hint.type} '
                               f'at {type_hint.line, type_hint.column}')
         self.advance()
+        if type_hint.type == TT.NOTHING_TYPE_HINT:
+            return ast.VarDeclNode(name_token, type_hint, None)
         self.expect(TT.ASSIGN)
         value = self.parse_expression()
         return ast.VarDeclNode(name_token, type_hint, value)
