@@ -91,7 +91,8 @@ class Interpreter:
         }
 
         self.BUILTINS: dict[str, callable] = {
-            'print': self.__print__
+            'print' : self.__print__   ,
+            'type'  : self.__get_type__,
         }
 
     # ------------------------------ entry point ----------------------------- #
@@ -255,6 +256,21 @@ class Interpreter:
     def __print__(self, args: list, call_token: Token):
         print(*(self._to_string(a) for a in args))
         return None
+    
+    def __get_type__(self, args: list, call_token: Token):
+        if len(args) != 1:
+            raise InterpreterError(f'type() takes exactly 1 argument, but got {len(args)}', call_token)
+        return self._python_type_to_hds_name(type(args[0]))
+    
+    @staticmethod
+    def _python_type_to_hds_name(py_type):
+        return {
+            bool : 'bool' ,
+            int  : 'int'  ,
+            float: 'float',
+            str  : 'str'  ,
+        }.get(py_type, py_type.__name__)
+
     
     @staticmethod
     def _to_string(value) -> str:

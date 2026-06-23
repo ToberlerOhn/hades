@@ -1,3 +1,4 @@
 m: int = 3;
 m /= 4;
-print(m)
+print(m);
+print(type(m))
