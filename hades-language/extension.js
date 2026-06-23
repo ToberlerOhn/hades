@@ -1,4 +1,4 @@
-// following code is purely vibe coded
+// following code is lowkey vibe coded
 // I don't have a clue how to make this especially in js
 // documentation is human made
 
