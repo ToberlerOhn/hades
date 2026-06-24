@@ -2,6 +2,7 @@
 #                                    Imports                                   #
 # ---------------------------------------------------------------------------- #
 
+# from __future__ import annotations
 from typing import Any as any
 
 # ---------------------------------------------------------------------------- #
@@ -9,7 +10,7 @@ from typing import Any as any
 # ---------------------------------------------------------------------------- #
 
 class Scope:
-    
+
     def __init__(self, parent: Scope | None = None):
         self.variables: dict[str, any] = {}
         self.parent = parent
@@ -20,7 +21,7 @@ class Scope:
         if self.parent is not None:
             return self.parent.get(name)
         raise KeyError(name)
-    
+
     def set(self, name: str, value: any) -> None:
         if name in self.variables:
             self.variables[name] = value

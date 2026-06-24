@@ -15,7 +15,7 @@ from typing import Any
 # ---------------------------------------------------------------------------- #
 
 class TT(Enum):
-	
+
 	# ---------------------------------- ignored --------------------------------- #
 	COMMENT    = auto() # \//...
 	NEWLINE    = auto() # \n
@@ -27,7 +27,6 @@ class TT(Enum):
 	BOOL  = auto() # TRUE | FALSE
 	STR   = auto()
 	ID    = auto()
-	LIST  = auto()
 
 	# --------------------------- variable type hints --------------------------- #
 
@@ -36,12 +35,13 @@ class TT(Enum):
 	BOOL_TYPE_HINT    = auto() # bool
 	STR_TYPE_HINT     = auto() # str
 	NOTHING_TYPE_HINT = auto() # nothing
+	LIST_TYPE_HINT    = auto() # list
 
 	# -------------------------------- comparisons ------------------------------- #
 	TYPE_EQ  = auto() #  ===
 	TYPE_NEQ = auto() # \!==
 	EQ       = auto() #  ==
-	NEQ      = auto() # \!= 
+	NEQ      = auto() # \!=
 	GTE      = auto() # >=
 	LTE      = auto() # <=
 	GT       = auto() # >
@@ -114,4 +114,3 @@ class Token:
 
 	def __repr__(self):
 		return f'Token({self.type}, {self.value!r}, {self.line}:{self.column})'
-	

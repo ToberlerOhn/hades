@@ -9,9 +9,9 @@ from typing import Any as any
 from .tokens import Token, TT
 from .scope import Scope
 
-type Node = (NumberNode | BoolNode | StringNode | IdNode | \
+type Node = (NumberNode | BoolNode | StringNode | ListNode | IndexNode | IdNode | \
 BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
-IfNode | CallNode |\
+IfNode | WhileNode | ForNode | FuncNode | ReturnNode | CallNode |\
 ProgramNode)
 
 # ---------------------------------------------------------------------------- #
@@ -43,13 +43,30 @@ class StringNode:
         return f'StringNode({self.value})'
 
 @dataclass
+class ListNode:
+    elements: list
+    token: Token
+
+    def __repr__(self):
+        return f'ListNode({self.elements!r})'
+
+@dataclass
+class IndexNode:
+    callee: any
+    index: any
+    token: Token
+
+    def __repr__(self):
+        return(f'ListCall({self.callee!r}[{self.index!r}])')
+
+@dataclass
 class IdNode:
     value: any
     token: Token
 
     def __repr__(self):
         return f'IdNode({self.value})'
-    
+
 # ---------------------------------------------------------------------------- #
 #                                  Operations                                  #
 # ---------------------------------------------------------------------------- #
@@ -71,7 +88,7 @@ class UnaryOpNode:
 
     def __repr__(self):
         return f'UnaryOpNode({self.op_token.type}, {self.operand!r})'
-    
+
 @dataclass
 class PostfixOpNode:
     """Postfix operations like incrementation"""
@@ -89,7 +106,7 @@ class AssignNode:
 
     def __repr__(self):
         return f'AssignNode({self.name_token.value!r}, {self.assign_token.type}, {self.value!r})'
-    
+
 @dataclass
 class VarDeclNode:
     name_token: Token
@@ -98,7 +115,7 @@ class VarDeclNode:
 
     def __repr__(self):
         return f'VarDeclNode({self.name_token.value!r}: {self.type_hint.type} = {self.value!r})'
-    
+
 # ---------------------------------------------------------------------------- #
 #                                 Control Flow                                 #
 # ---------------------------------------------------------------------------- #
@@ -110,7 +127,7 @@ class IfNode:
 
     def __repr__(self):
         return f'IfNode(branches={self.branches!r}, else_body = {self.else_body!r})'
-    
+
 @dataclass
 class WhileNode:
     is_do: bool
@@ -145,7 +162,7 @@ class FuncNode:
 
     def __repr__(self):
         return f'FuncDefNode({self.name}, {self.parameters!r} => {self.return_type}, body={self.body!r})'
-    
+
 @dataclass
 class Function:
     name: str

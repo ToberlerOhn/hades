@@ -11,7 +11,7 @@ from .helpers import match
 class Lexer:
 
 	# ----------------------------- helper functions ----------------------------- #
-	
+
 	def __init__(self, text: str) -> None:
 		self.text = text
 		self.pos = 0
@@ -35,7 +35,7 @@ class Lexer:
 	def peek(self, steps: int =1) -> str | None:
 		peek = self.pos + steps
 		return self.text[peek] if (0 <= peek < len(self.text)) else None
-	
+
 	# ------------------------------ main functions ------------------------------ #
 
 	def skip_whitespace(self) -> None:
@@ -64,7 +64,7 @@ class Lexer:
 			self.advance()
 		value = float(num) if type == TT.FLOAT else int(num)
 		return Token(type, value, start_line, start_col)
-	
+
 	def read_str(self) -> Token:
 		start_line, start_col = self.line, self.column
 		str_str = ''
@@ -89,10 +89,10 @@ class Lexer:
 
 		if self.current != "'":
 			self.RaiseError('Unterminated string literal')
-		
+
 		self.advance()
 		return Token(TT.STR, str_str, start_line, start_col)
-	
+
 	def read_id(self) -> Token:
 		start_line, start_col = self.line, self.column
 		id = ''
@@ -101,7 +101,7 @@ class Lexer:
 			id += self.current
 			self.advance()
 
-		# * Update later 
+		# * Update later
 		keywords: dict[str, TT] = {
 			'TRUE'    : TT.BOOL              ,
 			'FALSE'   : TT.BOOL              ,
@@ -110,6 +110,7 @@ class Lexer:
 			'bool'    : TT.BOOL_TYPE_HINT    ,
 			'str'     : TT.STR_TYPE_HINT     ,
 			'nothing' : TT.NOTHING_TYPE_HINT ,
+			'list'    : TT.LIST_TYPE_HINT    ,
 
 			'if'    : TT.IF   ,
 			'else'  : TT.ELSE ,
@@ -126,7 +127,7 @@ class Lexer:
 			value = id
 
 		return Token(tokenType, value, start_line, start_col)
-	
+
 	def get_next_token(self) -> Token:
 		while self.current:
 			while True:
@@ -149,14 +150,14 @@ class Lexer:
 			# if the current character is a digit, get number content
 			if match(self.current, r'\d'):
 				return self.read_number()
-			
+
 			# if the current is an apostrophe (start of string), get string content
 			if self.current == "'":
 				return self.read_str()
-			
+
 			if match(self.current, r'[A-Za-z\_]'):
 				return self.read_id()
-			
+
 			# --------------------------- 3 character tokens -------------------------- #
 			# TYPE_EQ (===), TYPE_NEQ (!==),
 			# AND_EQ (&&=), OR_EQ (||=), XOR_EQ (^^=)
@@ -164,95 +165,95 @@ class Lexer:
 			if self.current == self.peek() == self.peek(2) == '=':
 				self.advance(3)
 				return Token(TT.TYPE_EQ, '===', start_line, start_col)
-			
+
 			if self.current == '!' and (self.peek() == self.peek(2) == '='):
 				self.advance(3)
 				return Token(TT.TYPE_NEQ, '!==', start_line, start_col)
-			
+
 			if self.current == self.peek() == '&' and self.peek(2) == '=':
 				self.advance(3)
 				return Token(TT.AND_EQ, '&&=', start_line, start_col)
-			
+
 			if self.current == self.peek() == '|' and self.peek(2) == '=':
 				self.advance(3)
 				return Token(TT.OR_EQ, '||=', start_line, start_col)
-			
+
 			if self.current == self.peek() == '^' and self.peek(2) == '=':
 				self.advance(3)
 				return Token(TT.XOR_EQ, '^^=', start_line, start_col)
-			
+
 			# --------------------------- 2 character tokens -------------------------- #
-			# EQ (==), NEQ (!=), GTE (>=), LTE (<=), 
+			# EQ (==), NEQ (!=), GTE (>=), LTE (<=),
 			# PLUS_EQ (+=), MINUS_EQ (-=), STAR_EQ (*=), SLASH_EQ (/=), PERCENT_EQ (%=)
-			# AND (&&), OR (||), XOR (^^), 
+			# AND (&&), OR (||), XOR (^^),
 			# INCREMENT (++), DECREMENT (--),
 			# RIGHT_ARROW (->), RIGHT_DOUBLE_ARROW (=>)
 
 			if self.current == self.peek() == '=':
 				self.advance(2)
 				return Token(TT.EQ, '==', start_line, start_col)
-			
+
 			if self.current == '!' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.NEQ, '!=', start_line, start_col)
-			
+
 			if self.current == '>' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.GTE, '>=', start_line, start_col)
-			
+
 			if self.current == '<' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.LTE, '<=', start_line, start_col)
-			
+
 			if self.current == '+' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.PLUS_EQ, '+=', start_line, start_col)
-			
+
 			if self.current == '-' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.MINUS_EQ, '-=', start_line, start_col)
-			
+
 			if self.current == '*' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.STAR_EQ, '*=', start_line, start_col)
-			
+
 			if self.current == '/' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.SLASH_EQ, '/=', start_line, start_col)
-			
+
 			if self.current == '%' and self.peek() == '=':
 				self.advance(2)
 				return Token(TT.PERCENT_EQ, '%=', start_line, start_col)
-			
+
 			if self.current == self.peek() == '&':
 				self.advance(2)
 				return Token(TT.AND, '&&', start_line, start_col)
-			
+
 			if self.current == self.peek() == '|':
 				self.advance(2)
 				return Token(TT.OR, '||', start_line, start_col)
-			
+
 			if self.current == self.peek() == '^':
 				self.advance(2)
 				return Token(TT.XOR, '^^', start_line, start_col)
-			
+
 			if self.current == self.peek() == '+':
 				self.advance(2)
 				return Token(TT.INCREMENT, '++', start_line, start_col)
-			
+
 			if self.current == self.peek() == '-':
 				self.advance(2)
 				return Token(TT.DECREMENT, '--', start_line, start_col)
-			
+
 			if self.current == '-' and self.peek() == '>':
 				self.advance(2)
 				return Token(TT.RIGHT_ARROW, '->', start_line, start_col)
-			
+
 			if self.current == '=' and self.peek() == '>':
 				self.advance(2)
 				return Token(TT.RIGHT_DOUBLE_ARROW, '=>', start_line, start_col)
-			
-			
+
+
 			# --------------------------- 1 character tokens -------------------------- #
 
 			SINGLE_CHAR_TOKENS: dict[str, TT] = {
@@ -280,11 +281,11 @@ class Lexer:
 				char = self.current
 				self.advance()
 				return Token(SINGLE_CHAR_TOKENS[char], char, start_line, start_col)
-			
+
 			self.RaiseError(f'Unexpected character: {self.current}')
 
 		return Token(TT.EOF, None, self.line, self.column)
-	
+
 	def tokenize(self) -> list[Token]:
 		tokens: list[Token] = []
 		while True:
@@ -294,7 +295,7 @@ class Lexer:
 			if token.type == TT.EOF:
 				break
 		return tokens
-	
+
 	def pretty_print(self):
 		text = self.tokenize()
 		current_line = 1
@@ -307,19 +308,16 @@ class Lexer:
 				print(temp)
 				current_line += 1
 				temp = f'({str(token)[9:]}  '
-			
-	
+
+
 if __name__ == '__main__':
 	test = \
 	'''
-	//test
-	if (1 == 2) {
-		a: int = 3};
-	x: int = 5
-	y: float = 5.2
-	2 + x * 2;
-	(4 * 2.2 + y*3.3) && 0
-	x++
+	l: list = [1, 2, 3];
+	for (i: int = 0; i <= 2; i++) {
+		elem: int = l -> i;
+		print(elem);
+	}
 	'''
 
 	lexer = Lexer(test)

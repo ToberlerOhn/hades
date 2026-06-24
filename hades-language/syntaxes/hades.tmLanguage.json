@@ -33,7 +33,7 @@
       "patterns": [
         {
           "name": "storage.type.hades",
-          "match": "\\b(int|float|bool|str|nothing)\\b"
+          "match": "\\b(int|float|bool|str|list|nothing)\\b"
         }
       ]
     },
@@ -68,10 +68,6 @@
           "name": "keyword.operator.hades",
           "match": "\\+|-\\*|/|%|&|\\|^|!|=|>|<"
         }
-        // {
-        //   "name": "keyword.other.hades",
-        //   "match": ",|:"
-        // }
       ]
     },
     "functions": {

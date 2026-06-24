@@ -40,6 +40,8 @@ class Interpreter:
             ast.NumberNode   : self._eval_number,
             ast.BoolNode     : self._eval_bool,
             ast.StringNode   : self._eval_string,
+            ast.ListNode     : self._eval_list,
+            ast.IndexNode    : self._eval_index,
             ast.IdNode       : self._eval_id,
             ast.BinOpNode    : self._eval_binop,
             ast.UnaryOpNode  : self._eval_unaryop,
@@ -81,7 +83,7 @@ class Interpreter:
 
         self.POSTFIX_OPS: dict[TT, callable] = {
             TT.INCREMENT: lambda o: o + 1,
-            TT.DECREMENT: lambda o: o - 1
+            TT.DECREMENT: lambda o: o - 1,
         }
 
         self.ASSIGN_OPS: dict[TT, callable] = {
@@ -116,7 +118,7 @@ class Interpreter:
         for statement in node.statements:
             result = self.evaluate(statement)
         return result
-        
+
     def _eval_vardecl(self, node: ast.VarDeclNode):
         if node.value == None:
             value = None
@@ -125,7 +127,7 @@ class Interpreter:
         self._check_type_hint(value, node.type_hint, node.name_token)
         self.scope.declare(node.name_token.value, value)
         return value
-    
+
     def _eval_assign(self, node: ast.AssignNode):
         rhs_value = self.evaluate(node.value)
 
@@ -136,17 +138,17 @@ class Interpreter:
             current_value = self.scope.get(node.name_token.value)
         except KeyError:
             raise InterpreterError(f'Cannot assign to undeclared variable \'{node.name_token.value}\'', node.name_token)
-        
+
         try:
             new_value = func(current_value, rhs_value)
         except TypeError as e:
             raise InterpreterError(f'Invalid operand types for {node.assign_token.type.name}: '
                                    f'{type(current_value).__name__} and {type(rhs_value).__name__}',
                                    node.assign_token) from e
-        
+
         self.scope.set(node.name_token.value, new_value)
         return new_value
-    
+
     def _eval_if(self, node: ast.IfNode):
         for condition, body in node.branches:
             if self._truthy(self.evaluate(condition)):
@@ -154,7 +156,7 @@ class Interpreter:
         if node.else_body is not None:
             return self._eval_block(node.else_body)
         return None
-    
+
     def _eval_while(self, node: ast.WhileNode):
         is_do = node.is_do
         condition, body = node.condition, node.body
@@ -164,7 +166,7 @@ class Interpreter:
         while self._truthy(self.evaluate(condition)):
             result = self._eval_block(body)
         return result
-    
+
     def _eval_for(self, node: ast.ForNode):
         init, test, update, body = node.init, node.testExpression, node.updateStatement, node.body
         result = self.evaluate(init)
@@ -172,7 +174,7 @@ class Interpreter:
             result = self._eval_block(body)
             self.evaluate(update)
         return result
-    
+
     def _eval_func_def(self, node: ast.Function) -> None:
        if self.scope.has(node.name):
            raise InterpreterError(f'Cannot redefine \'{node.name}\'')
@@ -185,23 +187,23 @@ class Interpreter:
        )
        self.scope.declare(node.name, function)
        return
-        
+
     def _eval_call(self, node: ast.CallNode):
         name = node.callee_token.value
         args = [self.evaluate(arg) for arg in node.args]
         builtin = self.BUILTINS.get(name)
         if builtin is not None:
             return builtin(args, node.callee_token)
-        
+
         try:
             target = self.scope.get(name)
         except KeyError:
             raise InterpreterError(f'Undefined function \'{name}\'', node.callee_token)
         if not isinstance(target, ast.Function):
             raise InterpreterError(f'\'{name}\' is not callable', node.callee_token)
-        
-        return self._call_function(target, args, node.callee_token) 
-    
+
+        return self._call_function(target, args, node.callee_token)
+
     def _call_function(self, function: ast.Function, args: list, call_token: Token):
         if len(args) != len(function.parameters):
             raise InterpreterError(f'\'{function.name}\' expects {len(function.parameters)} \
@@ -213,7 +215,7 @@ class Interpreter:
         for (name, th), arg_val in zip(function.parameters, args):
             self._check_type_hint(arg_val, th, name)
             self.scope.declare(name.value, arg_val)
-        
+
         try:
             try:
                 self._eval_statements(function.body)
@@ -246,16 +248,39 @@ class Interpreter:
             result = self.evaluate(statement)
         return result
     # ------------------------------- literals ------------------------------- #
-    
+
     def _eval_number(self, node: ast.NumberNode):
         return node.value
-    
+
     def _eval_bool(self, node: ast.BoolNode):
         return node.value
-    
+
     def _eval_string(self, node: ast.StringNode):
         return node.value
-    
+
+    def _eval_list(self, node: ast.ListNode):
+        return [self.evaluate(element) for element in node.elements]
+
+    def _eval_index(self, node: ast.IndexNode):
+        container = self.evaluate(node.callee)
+        index = self.evaluate(node.index)
+
+        if not isinstance(container, list):
+            raise InterpreterError(f'Cannot index into value of type {self._py_type_to_hds_type(type(container))}', node.token)
+        
+        if isinstance(index, bool):
+            index = int(index) # attempt to convert any bools to ints
+        
+        if not isinstance(index, int):
+            raise InterpreterError(f'List index must be a number or boolean, got {self._py_type_to_hds_type(type(index))}', node.token)
+        
+        try:
+            return container[index]
+        except IndexError:
+            raise InterpreterError(
+                f'List index {index} out of range (length {len(container)})', node.token)
+
+
     def _eval_id(self, node: ast.IdNode):
         try:
             return self.scope.get(node.value)
@@ -272,16 +297,16 @@ class Interpreter:
         func = self.BINARY_OPS.get(op_type)
         if func is None:
             raise InterpreterError(f'Unknown binary operator: {op_type}', node.op_token)
-        
+
         try:
             return func(left, right)
         except ZeroDivisionError:
             raise InterpreterError(f'Division by zero', node.op_token)
         except TypeError as e:
             raise InterpreterError(
-                f'Invalid operand types for {op_type.name}: {type(left).__name__} and {type(right).__name__}', 
+                f'Invalid operand types for {op_type.name}: {type(left).__name__} and {type(right).__name__}',
                 node.op_token) from e
-        
+
     def _eval_unaryop(self, node: ast.UnaryOpNode):
         value = self.evaluate(node.operand)
         op_type = node.op_token.type
@@ -289,7 +314,7 @@ class Interpreter:
         func = self.UNARY_OPS.get(op_type)
         if func is None:
             raise InterpreterError(f'Unknown unary operator: {op_type}', node.op_token)
-        
+
         try:
             return func(value)
         except TypeError as e:
@@ -299,19 +324,20 @@ class Interpreter:
             ) from e
 
     def _eval_postfixop(self, node: ast.PostfixOpNode):
+
         if not isinstance(node.operand, ast.IdNode):
             raise InterpreterError(
                 f'Invalid target for {node.op_token.type.name}: {node.operand!r}',
                 node.op_token
             )
-        
+
         name = node.operand.value
         op_type = node.op_token.type
         try:
             old_value = self.scope.get(name)
         except KeyError:
             raise InterpreterError(f'Undefined variable: \'{name}\'', node.operand.token)
-        
+
         func = self.POSTFIX_OPS.get(op_type)
         if func is None:
             raise InterpreterError(f'Unknown postfix operator: \'{op_type}\'', node.op_token)
@@ -319,20 +345,20 @@ class Interpreter:
 
         self.scope.set(name, new_value)
         return old_value
-    
+
     # ------------------------------- built-ins ------------------------------ #
 
     def __print__(self, args: list, call_token: Token):
         print(*(self._to_string(a) for a in args))
         return None
-    
+
     def __get_type__(self, args: list, call_token: Token):
         if len(args) != 1:
             raise InterpreterError(f'type() takes exactly 1 argument, but got {len(args)}', call_token)
-        return self._python_type_to_hds_name(type(args[0]))
-    
+        return self._py_type_to_hds_type(type(args[0]))
+
     @staticmethod
-    def _python_type_to_hds_name(py_type):
+    def _py_type_to_hds_type(py_type):
         return {
             bool : 'bool' ,
             int  : 'int'  ,
@@ -340,7 +366,7 @@ class Interpreter:
             str  : 'str'  ,
         }.get(py_type, py_type.__name__)
 
-    
+
     @staticmethod
     def _to_string(value) -> str:
         if isinstance(value, bool):
@@ -350,7 +376,7 @@ class Interpreter:
         if isinstance(value, float):
             return f'{value:.10g}'.rstrip('0').rstrip('.') if '.' in f'{value:.10g}' else f'{value:.10g}'
         return str(value)
-    
+
     # --------------------------- helper functions --------------------------- #
 
     def _eval_block(self, statements: list):
@@ -375,16 +401,17 @@ class Interpreter:
 
     def _check_type_hint(self, value, type_hint_token: Token, name_token: Token):
         expected = {
-            TT.INT_TYPE_HINT     :      int   ,
-            TT.FLOAT_TYPE_HINT   :      float ,
-            TT.BOOL_TYPE_HINT    :      bool  ,
-            TT.STR_TYPE_HINT     :      str   ,
-            TT.NOTHING_TYPE_HINT : type(None ),
+            TT.INT_TYPE_HINT     :      int    ,
+            TT.FLOAT_TYPE_HINT   :      float  ,
+            TT.BOOL_TYPE_HINT    :      bool   ,
+            TT.STR_TYPE_HINT     :      str    ,
+            TT.LIST_TYPE_HINT    :      list   ,
+            TT.NOTHING_TYPE_HINT : type(None  ),
         }.get(type_hint_token.type)
 
         if expected is None:
             return
-        
+
         if expected is bool and not isinstance(value, bool):
             raise InterpreterError(
                 f'Type mismatch for \'{name_token.value}\': expected bool, but got {type(value).__name__}',
@@ -395,6 +422,6 @@ class Interpreter:
                 f'Type mismatch for \'{name_token.value}\': expected {expected.__name__}, but got {type(value).__name__}',
                 name_token
             )
-    
+
 def interpret_program(tree: ast.ProgramNode):
     return Interpreter().evaluate(tree)

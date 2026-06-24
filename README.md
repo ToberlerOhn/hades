@@ -111,7 +111,7 @@ Operator overloading is used to redefine the use of an operator in a specific us
 
 - list &rarr; [element0, element1...]
   - lists are mutable and have built in methods such as .update(), .remove(), .add(), etc.. See below documentation for more detail.
-  - accessed using list[element_index]
+  - accessed using list->element_index
 
 #### Defining variables using datatypes:
 
@@ -130,13 +130,13 @@ Variables above must be decalred and initialized in the same statement, with the
 
 ```
 foo: nothing;
-bar: _b = FALSE;
+bar: bool = FALSE;
 ```
 
 Lists must note the type within the list, with the possiblity of multiple types, but records do not:
 
 ```
-baz: list<int, float> = [1, 1.5, 2, 2.33];
+baz: list = [1, 1.5, 2, 2.33];
 qux: record = "1, 1.5, 2, 2.33";
 ```
 
