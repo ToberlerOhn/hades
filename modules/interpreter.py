@@ -99,8 +99,9 @@ class Interpreter:
         }
 
         self.BUILTINS: dict[str, callable] = {
-            'print' : self.__print__   ,
-            'type'  : self.__get_type__,
+            'print' : self.__print__    ,
+            'type'  : self.__get_type__ ,
+            'len'   : self.__len__      ,
         }
 
     # ------------------------------ entry point ----------------------------- #
@@ -356,6 +357,14 @@ class Interpreter:
         if len(args) != 1:
             raise InterpreterError(f'type() takes exactly 1 argument, but got {len(args)}', call_token)
         return self._py_type_to_hds_type(type(args[0]))
+    
+    def __len__(self, args: list, call_token: Token):
+        if len(args) != 1:
+            raise InterpreterError(f'len() takes exactly 1 argument, but got {len(args)}', call_token)
+        e = args[0]
+        if not isinstance(e, (str, list)):
+            raise InterpreterError(f'len() takes strings or lists, but got {self._py_type_to_hds_type(type(e))}', call_token)
+        return len(e)
 
     @staticmethod
     def _py_type_to_hds_type(py_type):

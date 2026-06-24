@@ -12,6 +12,7 @@ function activate(context) {
     const hadesDocs = {
         'print': '### `print`\nPrints to terminal.'           ,
         'type' : '### `type`\nReturns the type of the object.',
+        'len'  : '### `len`\nReturns the length of a string or list'
     };
 
     // Register the hover provider for the 'hades' language
