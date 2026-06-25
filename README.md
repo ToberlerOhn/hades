@@ -43,7 +43,7 @@ N.B.: Unary plus is equivalent to absolute value
 |        less than         |    `a < b`     |
 | greater than or equal to |    `a >= b`    |
 |  less than or equal to   |    `a <= b`    |
-|         contains         | `a contains b` |
+|         in               | `a in b`       |
 
 #### Logical Operators
 
@@ -308,7 +308,7 @@ for (i: int = 0; i < 3; i++) {
 ```
 
 ```
-for (i: int; [0, 1, 2] contains i) {
+for (i: int; i in [0, 1, 2]) {
     print(i)
 }
 ```
