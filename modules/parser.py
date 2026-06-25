@@ -271,21 +271,52 @@ class Parser:
         body = self._parse_block()
         return ast.WhileNode(is_do, condition, body)
 
-    def parse_for(self) -> ast.ForNode:
+    def parse_for(self) -> ast.ForNode | ast.ForInNode:
         """
+        for (var: th; var in list|str)
+        OR
         for (init; test; update) {
             ...}
         """
         self.expect(TT.FOR)
         self.expect(TT.LPAREN)
-        init   = self.parse_statement()
+        # Brute force detection of for_each loops
+        # TT.ID TT.COLON TT.TYPEHINT TT.SEMICOLON
+        # i     :        int         ;
+        peek1, peek3 = self.peek(), self.peek(3)
+        if peek1 is not None and peek3 is not None:
+            if self.check(TT.ID) and peek1.type == TT.COLON and peek3.type == TT.SEMICOLON:
+                return self.parse_forin()
+
+        # fall back to basic for loops
+        init = self.parse_statement()
         self.expect(TT.SEMICOLON)
-        test   = self.parse_statement()
+        test = self.parse_statement()
         self.expect(TT.SEMICOLON)
         update = self.parse_statement()
         self.expect(TT.RPAREN)
-        body   = self._parse_block()
+        body = self._parse_block()
         return ast.ForNode(init, test, update, body)
+    
+    def parse_forin(self) -> ast.ForInNode:
+        ...
+        var_name_token = self.expect(TT.ID)
+        self.expect(TT.COLON)
+        type_hint = self.current
+        self.advance()
+        self.expect(TT.SEMICOLON)
+
+        iterator_id = self.expect(TT.ID)
+        if iterator_id.value != var_name_token.value:
+            raise ParserError(f'Loop identifier mismatch: expected \'{var_name_token.value}\', but got \'{iterator_id.value}\'')
+        self.expect(TT.IN)
+        iterable = self.parse_expression()
+        self.expect(TT.RPAREN)
+        body = self._parse_block()
+        
+        var_decl = ast.VarDeclNode(var_name_token, type_hint, 0)
+        return ast.ForInNode(var_decl, iterable, body)
+
 
     def parse_func_def(self) -> ast.FuncNode:
         self.expect(TT.FUNC)

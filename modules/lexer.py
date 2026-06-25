@@ -315,7 +315,7 @@ if __name__ == '__main__':
 	test = \
 	'''
 	l: list = [1, 2, 3];
-	for (i: int = 0; i <= 2; i++) {
+	for (i: int = 0; i < len(list); i++) {
 		elem: int = l -> i;
 		print(elem);
 	}

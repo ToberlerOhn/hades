@@ -53,6 +53,7 @@ class Interpreter:
             ast.IfNode       : self._eval_if,
             ast.WhileNode    : self._eval_while,
             ast.ForNode      : self._eval_for,
+            ast.ForInNode    : self._eval_forin,
             ast.FuncNode     : self._eval_func_def,
             ast.ReturnNode   : self._eval_return,
         }
@@ -218,6 +219,22 @@ class Interpreter:
         while self._truthy(self.evaluate(test)):
             result = self._eval_block(body)
             self.evaluate(update)
+        return result
+    
+    def _eval_forin(self, node: ast.ForInNode):
+        iterable = self.evaluate(node.iterable)
+        if not isinstance(iterable, (list, str)):
+            raise InterpreterError(f"Cannot iterate over type '{self._py_type_to_hds_type(type(iterable))}'")
+        result = None
+        for item in iterable:
+            previous_scope = self.scope
+            self.scope = Scope(previous_scope)
+            try:
+                self._check_type_hint(item, node.iterator.type_hint, node.iterator.name_token)
+                self.scope.declare(node.iterator.name_token.value, item)
+                result = self._eval_statements(node.body)
+            finally:
+                self.scope = previous_scope
         return result
 
     def _eval_func_def(self, node: ast.Function) -> None:

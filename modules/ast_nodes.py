@@ -11,7 +11,7 @@ from .scope import Scope
 
 type Node = (NumberNode | BoolNode | StringNode | ListNode | IndexNode | IdNode | NothingNode | \
 BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
-IfNode | WhileNode | ForNode | FuncNode | ReturnNode | CallNode |\
+IfNode | WhileNode | ForNode | ForInNode | FuncNode | ReturnNode | CallNode |\
 ProgramNode)
 
 # ---------------------------------------------------------------------------- #
@@ -154,6 +154,14 @@ class ForNode:
     def __repr__(self):
         return f'ForNode({self.init}, {self.testExpression}, {self.updateStatement}, body={self.body!r})'
 
+@dataclass
+class ForInNode:
+    iterator: VarDeclNode
+    iterable: Node
+    body: list[any]
+
+    def __repr__(self):
+        return f'ForInNode({self.iterator!r}, {self.iterable!r}, body={self.body!r})'
 
 # ---------------------------------------------------------------------------- #
 #                                  Structures                                  #
