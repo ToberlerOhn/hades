@@ -117,6 +117,7 @@ class Lexer:
 			'do'    : TT.DO   ,
 			'while' : TT.WHILE,
 			'for'   : TT.FOR  ,
+			'in'    : TT.IN   ,
 			'func'  : TT.FUNC ,
 		}
 

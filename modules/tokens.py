@@ -97,6 +97,7 @@ class TT(Enum):
 	DO    = auto() # do
 	WHILE = auto() # while
 	FOR   = auto() # for
+	IN    = auto() # in
 	FUNC  = auto() # func
 
 	EOF = auto()

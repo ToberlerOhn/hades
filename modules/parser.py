@@ -59,7 +59,7 @@ class Parser:
         TT.OR   : 1, TT.XOR: 1,
         TT.AND  : 2,
         TT.EQ   : 3, TT.NEQ:   3, TT.TYPE_EQ : 3, TT.TYPE_NEQ : 3,
-        TT.LT   : 4, TT.GT   : 4, TT.LTE     : 4, TT.GTE      : 4,
+        TT.LT   : 4, TT.GT   : 4, TT.LTE     : 4, TT.GTE      : 4, TT.IN: 4,
         TT.PLUS : 5, TT.MINUS: 5,
         TT.STAR : 6, TT.SLASH: 6, TT.PERCENT : 6,
     }

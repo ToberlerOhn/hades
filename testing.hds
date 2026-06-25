@@ -2,3 +2,4 @@ test_list: list = [1, 2, 3, 4, 5, [1, 2, 3, 4, 5]];
 for (i: int = 0; i < 5; i++) {
     print(test_list->5->i)
 }
+print(1 in test_list && 6 in test_list)

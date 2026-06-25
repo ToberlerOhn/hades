@@ -73,7 +73,8 @@ class Interpreter:
             TT.GTE     : lambda lhs, rhs:          lhs >=        rhs,
             TT.AND     : lambda lhs, rhs: bool(    lhs) and bool(rhs),
             TT.OR      : lambda lhs, rhs: bool(    lhs) or bool( rhs),
-            TT.XOR     : lambda lhs, rhs: (bool(   lhs) or bool( rhs)) and not(bool(lhs) and bool(rhs)) # (p V q) ^ ~(p ^ q) https://en.wikipedia.org/wiki/Exclusive_or#Definition
+            TT.XOR     : lambda lhs, rhs: (bool(   lhs) or bool( rhs)) and not(bool(lhs) and bool(rhs)), # (p V q) ^ ~(p ^ q) https://en.wikipedia.org/wiki/Exclusive_or#Definition
+            TT.IN      : self._eval_in_op
         }
 
         self.UNARY_OPS: dict[TT, callable] = {
@@ -192,7 +193,6 @@ class Interpreter:
                                    ) from e
         container[index] = new_value
         return new_value
-
 
     def _eval_if(self, node: ast.IfNode):
         for condition, body in node.branches:
@@ -328,7 +328,6 @@ class Interpreter:
             raise InterpreterError(
                 f'List index {index} out of range (length {len(container)})', node.token)
 
-
     def _eval_id(self, node: ast.IdNode):
         try:
             return self.scope.get(node.value)
@@ -393,6 +392,15 @@ class Interpreter:
 
         self.scope.set(name, new_value)
         return old_value
+    
+    def _eval_in_op(self, lhs, rhs):
+        if not isinstance(rhs, (list, str)):
+            raise TypeError(f'Operator \'in\' is not supported for right-hand type \'{self._py_type_to_hds_type(type(rhs))}\'')
+        
+        if isinstance(rhs, str) and not isinstance(lhs, str):
+            raise TypeError(f'Expected \'str\' on left-hand side of \'in\' operation, but got \'{self._py_type_to_hds_type(type(lhs))}\'')
+        
+        return lhs in rhs
 
     # ------------------------------- built-ins ------------------------------ #
 
