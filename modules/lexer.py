@@ -54,7 +54,7 @@ class Lexer:
 		num = ''
 		type = TT.INT
 
-		while self.current and match(self.current, r'[\d\.]'):
+		while self.current and (self.current.isdigit() or self.current == '.'):
 			if self.current == '.':
 				if type == TT.INT:
 					type = TT.FLOAT
@@ -97,7 +97,7 @@ class Lexer:
 		start_line, start_col = self.line, self.column
 		id = ''
 
-		while self.current and match(self.current, r'[\w]'):
+		while self.current and (self.current.isalnum() or self.current == '_'):
 			id += self.current
 			self.advance()
 

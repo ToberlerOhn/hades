@@ -37,6 +37,7 @@ class Interpreter:
 
         self.NODE_HANDLERS: dict[any, callable] = {
             ast.ProgramNode  : self._eval_program,
+            ast.NothingNode  : self._eval_nothing,
             ast.NumberNode   : self._eval_number,
             ast.BoolNode     : self._eval_bool,
             ast.StringNode   : self._eval_string,
@@ -135,20 +136,63 @@ class Interpreter:
         func = self.ASSIGN_OPS.get(node.assign_token.type)
         if func is None:
             raise InterpreterError(f'Unknown assigner \'{node.assign_token.value}\'')
+        
+        if isinstance(node.target, ast.IdNode): 
+            return self._assign_to_id(node.target, func, rhs_value, node.assign_token)
+        
+        if isinstance(node.target, ast.IndexNode): 
+            return self._assign_to_index(node.target, func, rhs_value, node.assign_token)
+        
+        raise InterpreterError(f'Invalid assignment target: {node.target!r}', node.assign_token)
+
+    def _assign_to_id(self, target: ast.IdNode, op_func, rhs_value, assign_token: Token):
         try:
-            current_value = self.scope.get(node.name_token.value)
+            current_value = self.scope.get(target.value)
         except KeyError:
-            raise InterpreterError(f'Cannot assign to undeclared variable \'{node.name_token.value}\'', node.name_token)
+            raise InterpreterError(f'Cannot assign to undeclared variable \'{target.value}\'', target.token)
 
         try:
-            new_value = func(current_value, rhs_value)
+            new_value = op_func(current_value, rhs_value)
+        except ZeroDivisionError:
+            raise InterpreterError(f'Division by zero', assign_token)
         except TypeError as e:
-            raise InterpreterError(f'Invalid operand types for {node.assign_token.type.name}: '
+            raise InterpreterError(f'Invalid operand types for {assign_token.type.name}: '
                                    f'{type(current_value).__name__} and {type(rhs_value).__name__}',
-                                   node.assign_token) from e
+                                   assign_token) from e
 
-        self.scope.set(node.name_token.value, new_value)
+        self.scope.set(target.value, new_value)
         return new_value
+    
+    def _assign_to_index(self, target: ast.IndexNode, op_func, rhs_value, assign_token: Token):
+        container = self.evaluate(target.callee)
+        index = self.evaluate(target.index)
+
+        if not isinstance(container, list):
+            raise InterpreterError(f'Cannot index into value of type {self._py_type_to_hds_type(type(container))}', target.token)
+        
+        if isinstance(index, bool):
+            index = int(index) # attempt to convert any bools to ints
+        
+        if not isinstance(index, int):
+            raise InterpreterError(f'List index must be a number or boolean, got {self._py_type_to_hds_type(type(index))}', target.token)
+        
+        try:
+            current_value = container[index]
+        except IndexError:
+            raise InterpreterError(
+                f'List index {index} out of range (length {len(container)})', target.token)
+        
+        try:
+            new_value = op_func(current_value, rhs_value)
+        except ZeroDivisionError:
+            raise InterpreterError(f'Division by zero', assign_token)
+        except TypeError as e:
+            raise InterpreterError(f'Invalid operand types for {assign_token.type.name}: '
+                                   f'{type(current_value).__name__} and {type(rhs_value).__name__}'
+                                   ) from e
+        container[index] = new_value
+        return new_value
+
 
     def _eval_if(self, node: ast.IfNode):
         for condition, body in node.branches:
@@ -211,7 +255,7 @@ class Interpreter:
                                    argument{"s" if len(function.parameters) != 1 else ""}, but got {len(args)}',
                                    call_token)
         previous_scope = self.scope
-        self.scope = Scope(previous_scope)
+        self.scope = Scope(function.closure_scope)
 
         for (name, th), arg_val in zip(function.parameters, args):
             self._check_type_hint(arg_val, th, name)
@@ -249,6 +293,9 @@ class Interpreter:
             result = self.evaluate(statement)
         return result
     # ------------------------------- literals ------------------------------- #
+
+    def _eval_nothing(self, node: ast.NothingNode):
+        return None
 
     def _eval_number(self, node: ast.NumberNode):
         return node.value

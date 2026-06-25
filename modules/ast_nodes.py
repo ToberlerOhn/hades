@@ -9,7 +9,7 @@ from typing import Any as any
 from .tokens import Token, TT
 from .scope import Scope
 
-type Node = (NumberNode | BoolNode | StringNode | ListNode | IndexNode | IdNode | \
+type Node = (NumberNode | BoolNode | StringNode | ListNode | IndexNode | IdNode | NothingNode | \
 BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
 IfNode | WhileNode | ForNode | FuncNode | ReturnNode | CallNode |\
 ProgramNode)
@@ -17,6 +17,13 @@ ProgramNode)
 # ---------------------------------------------------------------------------- #
 #                                   Literals                                   #
 # ---------------------------------------------------------------------------- #
+
+@dataclass
+class NothingNode:
+    token: Token
+
+    def __repr__(self):
+        return f'NothingNode()'
 
 @dataclass
 class NumberNode:
@@ -100,12 +107,12 @@ class PostfixOpNode:
 
 @dataclass
 class AssignNode:
-    name_token: Token
+    target: any
     assign_token: Token
     value: any
 
     def __repr__(self):
-        return f'AssignNode({self.name_token.value!r}, {self.assign_token.type}, {self.value!r})'
+        return f'AssignNode({self.target.value!r}, {self.assign_token.type}, {self.value!r})'
 
 @dataclass
 class VarDeclNode:
@@ -156,7 +163,7 @@ class ForNode:
 class FuncNode:
     """Define a function"""
     name: str
-    parameters: list[Token]
+    parameters: list[tuple[Token, Token]]
     return_type: Token
     body: list[any]
 

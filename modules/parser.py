@@ -22,13 +22,14 @@ class Parser:
         self.current = self.tokens[0]
 
         self.PRIMARY_HANDLERS: dict[TT, callable] = {
-            TT.INT      : self._parse_number       ,
-            TT.FLOAT    : self._parse_number       ,
-            TT.BOOL     : self._parse_bool         ,
-            TT.STR      : self._parse_string       ,
-            TT.ID       : self._parse_identifier   ,
-            TT.LBRACKET : self._parse_list_literal ,
-            TT.LPAREN   : self._parse_grouping     ,
+            TT.NOTHING_TYPE_HINT : self._parse_nothing      ,
+            TT.INT               : self._parse_number       ,
+            TT.FLOAT             : self._parse_number       ,
+            TT.BOOL              : self._parse_bool         ,
+            TT.STR               : self._parse_string       ,
+            TT.ID                : self._parse_identifier   ,
+            TT.LBRACKET          : self._parse_list_literal ,
+            TT.LPAREN            : self._parse_grouping     ,
         }
 
         self.STATEMENT_HANDLERS: dict[TT, callable] = {
@@ -170,7 +171,7 @@ class Parser:
     def parse_assignment(self):
         left = self.parse_binary()
         if self.check(*self.ASSIGN_OPS):
-            if not isinstance(left, ast.IdNode):
+            if not isinstance(left, (ast.IdNode, ast.IndexNode)):
                 raise ParserError(f'Invalid assignment target: {left!r}')
             assign_token = self.current
             self.advance()
@@ -348,6 +349,11 @@ class Parser:
 
     # --------------------------- primary handlers --------------------------- #
 
+    def _parse_nothing(self) -> ast.NothingNode:
+        tok = self.current
+        self.advance()
+        return ast.NothingNode(tok)
+
     def _parse_number(self) -> ast.NumberNode:
         tok = self.current
         self.advance()
@@ -376,7 +382,7 @@ class Parser:
 
     def _parse_index(self, callee_node) -> ast.IndexNode:
         arrow_token = self.expect(TT.RIGHT_ARROW)
-        index_expr = self.parse_unary()
+        index_expr = self.parse_primary()
         return ast.IndexNode(callee_node, index_expr, arrow_token)
 
     def _parse_identifier(self):
