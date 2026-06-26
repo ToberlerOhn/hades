@@ -90,9 +90,16 @@ class Parser:
     def expect(self, token_type: TT):
         """consumes the current token if it matches the expected `token_type`,
         else raises a parse error"""
+        # error handling
         if self.current.type != token_type:
-            raise ParserError(f'Expected {token_type}, got {self.current.type} '
-                              f'at {self.current.line}, {self.current.column}')
+            friendly_names = {
+                TT.SEMICOLON: "';' to terminate the statement",
+                TT.RPAREN: "')' to close the expression",
+                TT.RBRACE: "'}' to close the block",
+            }
+            hint = friendly_names.get(token_type, f'token type {token_type.name}')
+            raise ParserError(f'Expected {hint}, but found \'{self.current.value}\'')
+        
         token = self.current
         self.advance()
         return token

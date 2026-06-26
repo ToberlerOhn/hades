@@ -1,4 +1,5 @@
 import re
+
 def match(string: str, pattern: str) -> bool:
     """
 
@@ -14,7 +15,22 @@ def match(string: str, pattern: str) -> bool:
     m = re.search(pattern, string)
     return bool(m)
 
+def f_error(error_type: str, message: str, source_text: str, line: int, column: int) -> str:
+    lines = source_text.split('\n')
+    if line < 0 or line >= len(lines):
+        return f'{error_type}: {message} (at line {line + 1}, col {column})'
+    
+    error_line = lines[line]
+    pointer = ' ' * (column - 1) + '^'
+    
+    return (
+f'''
+-- {error_type} ------------------------
+Error: {message}
+Line {line + 1}:
+    {error_line}
+    {pointer}
+----------------------------------------''')
+
 if __name__ == '__main__':
-    print(match(r'2', r'[\d]'))
-    print(match(r'5', r'535'))
-    print(match(r'5', r'[53]'))
+    ...

@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from modules.lexer import Lexer
 from modules.parser import Parser
 from modules.interpreter import Interpreter, InterpreterError
+from modules.helpers import f_error
 
 def main():
     if len(sys.argv) < 2:
@@ -39,8 +40,18 @@ def main():
         tree = Parser(tokens).parse()
         if is_verbose: print(tokens, tree, sep='\n')
         Interpreter().evaluate(tree)
-    except (SyntaxError, InterpreterError) as e:
-        print(f'Error: {e}')
+    except SyntaxError as e:
+        line, column = getattr(e, 'line', 1), getattr(e, 'line', 1)
+        clean_msg = str(e).split(' at ')[0]
+
+        print(f_error('Syntax Error', clean_msg, source, line, column))
+        sys.exit(1)
+    except InterpreterError as e:
+        line = e.token.line if e.token else 1
+        column = e.token.column if e.token else 1
+        clean_msg = str(e).split(' at ')[0]
+        
+        print(f_error('Runtime error', clean_msg, source, line, column))
         sys.exit(1)
 
 if __name__ == "__main__":

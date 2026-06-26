@@ -7,6 +7,7 @@ from .tokens import TT, Token
 from .scope import Scope
 from typing import Any as any
 from typing import Callable as callable
+import difflib
 
 
 # ---------------------------------------------------------------------------- #
@@ -349,7 +350,12 @@ class Interpreter:
         try:
             return self.scope.get(node.value)
         except KeyError:
-            raise InterpreterError(f'Undefined variable \'{node.value}\'', node.token)
+            visible_vars = list(self.scope.variables.keys())
+            closest_matches = difflib.get_close_matches(node.value, visible_vars, n=1, cutoff=0.6)
+            msg = f'Undefined variable \'{node.value}\''
+            if closest_matches:
+                msg += f'. Did you mean \'{closest_matches[0]}\''
+            raise InterpreterError(msg, node.token)
 
     # ------------------------------ operations ------------------------------ #
 
