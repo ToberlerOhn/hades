@@ -112,7 +112,8 @@ class AssignNode:
     value: any
 
     def __repr__(self):
-        return f'AssignNode({self.target.value!r}, {self.assign_token.type}, {self.value!r})'
+        target_name = self.target.value if hasattr(self.target, 'value') else self.target
+        return f'AssignNode({target_name!r}, {self.assign_token.type}, {self.value!r})'
 
 @dataclass
 class VarDeclNode:

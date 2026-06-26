@@ -1,3 +1,9 @@
-for (i: int; i in [0, 1, 2]) {
-    print(i)
+tl: list = [0, 1, 2];
+print(tl);
+for (i: int = 0; i < len(tl); i++) {
+    print(tl->i);
+    tl->i += 1;
+    print(i, tl->i)
 }
+print(tl);
+print(tl !== 'hi')

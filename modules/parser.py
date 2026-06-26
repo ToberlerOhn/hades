@@ -176,7 +176,7 @@ class Parser:
             assign_token = self.current
             self.advance()
             right = self.parse_assignment()
-            return ast.AssignNode(left.token, assign_token, right)
+            return ast.AssignNode(left, assign_token, right)
         return left
 
     def parse_binary(self, min_precedence: int =1):

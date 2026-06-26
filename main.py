@@ -32,9 +32,12 @@ def main():
     
     source = file_path.read_text()
 
+    is_verbose = len(sys.argv) > 2 and sys.argv[2] in ['-v', '--verbose']
+
     try:
         tokens = Lexer(source).tokenize()
         tree = Parser(tokens).parse()
+        if is_verbose: print(tokens, tree, sep='\n')
         Interpreter().evaluate(tree)
     except (SyntaxError, InterpreterError) as e:
         print(f'Error: {e}')

@@ -59,23 +59,23 @@ class Interpreter:
         }
 
         self.BINARY_OPS: dict[TT, callable] = {
-            TT.PLUS    : lambda lhs, rhs:          lhs +         rhs,
-            TT.MINUS   : lambda lhs, rhs:          lhs -         rhs,
-            TT.STAR    : lambda lhs, rhs:          lhs *         rhs,
-            TT.SLASH   : lambda lhs, rhs:          lhs /         rhs,
-            TT.PERCENT : lambda lhs, rhs:          lhs %         rhs,
-            TT.EQ      : lambda lhs, rhs:          lhs ==        rhs,
-            TT.NEQ     : lambda lhs, rhs:          lhs !=        rhs,
-            TT.TYPE_EQ : lambda lhs, rhs: type(    lhs) == type( rhs) and lhs == rhs,
-            TT.TYPE_NEQ: lambda lhs, rhs: not(type(lhs) == type( rhs) and lhs == rhs),
-            TT.LT      : lambda lhs, rhs:          lhs <         rhs,
-            TT.GT      : lambda lhs, rhs:          lhs >         rhs,
-            TT.LTE     : lambda lhs, rhs:          lhs <=        rhs,
-            TT.GTE     : lambda lhs, rhs:          lhs >=        rhs,
-            TT.AND     : lambda lhs, rhs: bool(    lhs) and bool(rhs),
-            TT.OR      : lambda lhs, rhs: bool(    lhs) or bool( rhs),
-            TT.XOR     : lambda lhs, rhs: (bool(   lhs) or bool( rhs)) and not(bool(lhs) and bool(rhs)), # (p V q) ^ ~(p ^ q) https://en.wikipedia.org/wiki/Exclusive_or#Definition
-            TT.IN      : self._eval_in_op
+            TT.PLUS     : lambda lhs        , rhs: lhs + rhs,
+            TT.MINUS    : lambda lhs        , rhs: lhs - rhs,
+            TT.STAR     : lambda lhs        , rhs: lhs * rhs,
+            TT.SLASH    : lambda lhs        , rhs: lhs / rhs,
+            TT.PERCENT  : lambda lhs        , rhs: lhs % rhs,
+            TT.EQ       : lambda lhs        , rhs: lhs == rhs,
+            TT.NEQ      : lambda lhs        , rhs: lhs != rhs,
+            TT.TYPE_EQ  : lambda lhs        , rhs: type( lhs) == type( rhs) and lhs == rhs,
+            TT.TYPE_NEQ : lambda lhs        , rhs: not(type(lhs) == type( rhs) and lhs == rhs),
+            TT.LT       : lambda lhs        , rhs: lhs < rhs,
+            TT.GT       : lambda lhs        , rhs: lhs > rhs,
+            TT.LTE      : lambda lhs        , rhs: lhs <= rhs,
+            TT.GTE      : lambda lhs        , rhs: lhs >= rhs,
+            TT.AND      : lambda lhs        , rhs: bool( lhs) and bool(rhs),
+            TT.OR       : lambda lhs        , rhs: bool( lhs) or bool( rhs),
+            TT.XOR      : lambda lhs        , rhs: bool(lhs) ^ bool(rhs),
+            TT.IN       : self  ._eval_in_op
         }
 
         self.UNARY_OPS: dict[TT, callable] = {
