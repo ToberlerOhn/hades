@@ -129,14 +129,14 @@ Operator overloading is used to redefine the use of an operator in a specific us
 
 Variables above must be decalred and initialized in the same statement, with the exeption of nothing. For example,
 
-```hades
+```cpp
 foo: nothing;
 bar: bool = FALSE;
 ```
 
 Lists must note the type within the list, with the possiblity of multiple types, but records do not:
 
-```hades
+```cpp
 baz: list = [1, 1.5, 2, 2.33];
 qux: record = "1, 1.5, 2, 2.33";
 ```
@@ -145,7 +145,7 @@ qux: record = "1, 1.5, 2, 2.33";
 
 ###### Functions
 
-```hades
+```cpp
 func my_function(parameter1: type, paramter2: type...) => ReturnType {
     // function body goes here
     => exp // returning
@@ -158,7 +158,7 @@ Structures (structs) aggregate the storage of multiple data items, of potentiall
 
 Example definition:
 
-```hades
+```cpp
 Student: struct = {
     age: int;
     id: int;
@@ -169,7 +169,7 @@ Student: struct = {
 
 There are two ways to create a struct from a template:
 
-```hades
+```cpp
 Alice: struct<Student> = {21, 82911, 'UMass Amherst', 3.712};
 Bob: struct<Student> = {
     age = 20,
@@ -191,9 +191,9 @@ Classes have an on-creation built in method that is called on creation (duh), ca
 
 Example definition:
 
-```hades
-Student: class {
-    creator Student(name: str, age: int, year: int, gpa: float) => nothing {
+```cpp
+Student: class {    
+    creator Student(me, name: str, age: int, year: int, gpa: float) => nothing {
         my.name: str = name;
         my.age: int = age;
         my.year: int = year;
@@ -219,7 +219,7 @@ Student: class {
 
 Example creation:
 
-```hades
+```cpp
 Alice: Student = Student{
     'Alice',
     20,
@@ -234,7 +234,7 @@ print(Alice.age); // prints 21
 
 If statements are handled like most languages:
 
-```hades
+```cpp
 foo = 5;
 if (foo == 3) {
     print('foo is 3');
@@ -254,7 +254,7 @@ There are four types of loops.
 
 A while loop checks a condition, then if the condition is truthy, executes the statement within the brackets. It continues doing this until the condition is false.
 
-```hades
+```cpp
 while (condition) {
     // code goes here
 };
@@ -262,7 +262,7 @@ while (condition) {
 
 Do-while loops first do the statement within brackets, then check the condition after. This means that a do-while loop is executed at least once, buta a while loop may not be executed at all.
 
-```hades
+```cpp
 do {
     // code goes here
 } while (condition);
@@ -270,7 +270,7 @@ do {
 
 Here is code using both types of while loops that both output
 
-```hades
+```cpp
 0
 1
 2
@@ -278,7 +278,7 @@ Here is code using both types of while loops that both output
 
 using a while loop:
 
-```hades
+```cpp
 i = 0;
 while (i < 3) {
     print(i);
@@ -288,7 +288,7 @@ while (i < 3) {
 
 using a do-while loop:
 
-```hades
+```cpp
 i = 0;
 do {
     print(i);
@@ -302,13 +302,13 @@ There are two types of for loops, a for loop and a for-each-in loop.
 
 The below code prints the same as the above while loops:
 
-```hades
+```cpp
 for (i: int = 0; i < 3; i++) {
     print(i);
 };
 ```
 
-```hades
+```cpp
 for (i: int; i in [0, 1, 2]) {
     print(i)
 }
@@ -332,7 +332,7 @@ A `break` statement exits a loop.
 
 A `_goTo` statement goes to a specific label, which is defined at some point during the code.
 
-```hades
+```cpp
 //...
 if (elem == 'end') {
     _goTo END
