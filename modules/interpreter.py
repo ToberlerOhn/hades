@@ -238,10 +238,10 @@ class Interpreter:
                 self.scope = previous_scope
         return result
 
-    def _eval_func_def(self, node: ast.Function) -> None:
+    def _eval_func_def(self, node: ast.HadesFunction) -> None:
        if self.scope.has(node.name):
            raise InterpreterError(f'Cannot redefine \'{node.name}\'')
-       function = ast.Function(
+       function = ast.HadesFunction(
            name=node.name,
            parameters=node.parameters,
            return_type=node.return_type,
@@ -262,12 +262,12 @@ class Interpreter:
             target = self.scope.get(name)
         except KeyError:
             raise InterpreterError(f'Undefined function \'{name}\'', node.callee_token)
-        if not isinstance(target, ast.Function):
+        if not isinstance(target, ast.HadesFunction):
             raise InterpreterError(f'\'{name}\' is not callable', node.callee_token)
 
         return self._call_function(target, args, node.callee_token)
 
-    def _call_function(self, function: ast.Function, args: list, call_token: Token):
+    def _call_function(self, function: ast.HadesFunction, args: list, call_token: Token):
         if len(args) != len(function.parameters):
             raise InterpreterError(f'\'{function.name}\' expects {len(function.parameters)} \
                                    argument{"s" if len(function.parameters) != 1 else ""}, but got {len(args)}',
@@ -428,7 +428,7 @@ class Interpreter:
     # ------------------------------- built-ins ------------------------------ #
 
     def __print__(self, args: list, call_token: Token):
-        print(*(self._to_string(a) for a in args))
+        print(*(self._to_string(a) for a in args), sep='')
         return None
 
     def __get_type__(self, args: list, call_token: Token):

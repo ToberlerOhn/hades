@@ -119,6 +119,12 @@ class Lexer:
 			'for'   : TT.FOR  ,
 			'in'    : TT.IN   ,
 			'func'  : TT.FUNC ,
+
+			'class'    : TT.CLASS    ,
+			'creator'  : TT.CREATOR  ,
+			'method'   : TT.METHOD   ,
+			'operator' : TT.OPERATOR ,
+			'my'       : TT.MY       ,
 		}
 
 		tokenType = keywords.get(id, TT.ID)
@@ -275,6 +281,7 @@ class Lexer:
 				';': TT.SEMICOLON,
 				':': TT.COLON,
 				',': TT.COMMA,
+				'.': TT.DOT,
 				'!': TT.NOT,
 			}
 

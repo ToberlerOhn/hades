@@ -86,6 +86,7 @@ class TT(Enum):
 	SEMICOLON = auto() # ;
 	COLON     = auto() # :
 	COMMA     = auto() # ,
+	DOT       = auto() # .
 
 	# ------------------------------ other symbols ------------------------------ #
 	RIGHT_ARROW        = auto() # ->
@@ -99,6 +100,12 @@ class TT(Enum):
 	FOR   = auto() # for
 	IN    = auto() # in
 	FUNC  = auto() # func
+
+	CLASS    = auto() # class
+	CREATOR  = auto() # creator
+	METHOD   = auto() # method
+	OPERATOR = auto() # operator
+	MY       = auto() # my
 
 	EOF = auto()
 

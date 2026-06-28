@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any as any
 from .tokens import Token, TT
 from .scope import Scope
+from .interpreter import InterpreterError
 
 type Node = (NumberNode | BoolNode | StringNode | ListNode | IndexNode | IdNode | NothingNode | \
 BinOpNode | UnaryOpNode | PostfixOpNode | AssignNode | VarDeclNode | \
@@ -179,13 +180,6 @@ class FuncNode:
     def __repr__(self):
         return f'FuncDefNode({self.name}, {self.parameters!r} => {self.return_type}, body={self.body!r})'
 
-@dataclass
-class Function:
-    name: str
-    parameters: list
-    return_type: Token
-    body: list
-    closure_scope: Scope
 
 @dataclass
 class ReturnNode:
@@ -204,6 +198,33 @@ class CallNode:
 
     def __repr__(self):
         return f'CallNode({self.callee_token.value!r}, args={self.args!r})'
+    
+@dataclass
+class ClassDefNode:
+    name: str
+    creator: FuncNode | None
+    methods: list[FuncNode]
+    overloads: list[FuncNode]
+
+    def __repr__(self):
+        return f'ClassDefNode({self.name}, creator={self.creator!r}, methods={self.methods!r}, overloads={self.overloads!r})'
+    
+@dataclass
+class PropertyAccessNode:
+    obj: any
+    prop_name: Token
+
+    def __repr__(self):
+        return f'PropertyAccessNode({self.obj!r}.{self.prop_name.value})'
+    
+@dataclass
+class PropertyAssignNode:
+    obj: any
+    prop_name: Token
+    value: any
+
+    def __repr__(self):
+        return f'PropertyAccessNode({self.obj!r}.{self.prop_name.value} {self.value!r})'
 
 # ---------------------------------------------------------------------------- #
 #                                   Grouping                                   #
@@ -215,3 +236,47 @@ class ProgramNode:
 
     def __repr__(self):
         return f'ProgramNode({self.statements})'
+    
+# ---------------------------------------------------------------------------- #
+#                                Runtime Objects                               #
+# ---------------------------------------------------------------------------- #
+# These are not technically ast nodes but for right now I don't really have a 
+# better place to put them. Runtime objects encode the data about each object
+# in the ast node that is defined such as a function definition => function
+# calls, class definitions and method calls => classes and methods.
+
+@dataclass
+class HadesFunction:
+    name: str
+    parameters: list
+    return_type: Token
+    body: list
+    closure_scope: Scope
+
+class HadesClass:
+    
+    def __init__(self, name: str, creator: HadesFunction | None, methods: dict[str, HadesFunction]):
+        self.name = name
+        self.creator = creator
+        self.methods = methods
+
+    def __repr__(self):
+        return f'<class \'{self.name}\'>'
+
+class HadesInstance:
+    def __init__(self, hades_class: HadesClass, properties: dict[str, any]):
+        self.hades_class = hades_class
+        self.properties = properties
+
+    def get(self, name: Token):
+        if name in self.properties:
+            return self.properties[name.value]
+        if name.value in self.hades_class.methods:
+            return self.hades_class.methods[name.value]
+        raise InterpreterError(f'\'{self.hades_class.name}\' has no attribute \'{name.value}\'', name)
+    
+    def set(self, name: Token, value: any):
+        self.properties[name.value] = value
+    
+    def __repr__(self):
+        return f'<Instance of \'{self.hades_class.name}\'>'

@@ -11,7 +11,10 @@ from typing import Callable as callable
 # ---------------------------------------------------------------------------- #
 
 class ParserError(SyntaxError):
-    ...
+    def __init__(self, message: str, token: Token):
+        super().__init__(message)
+        self.line = token.line
+        self.column = token.column
 
 class Parser:
     def __init__(self, tokens: list[Token]):
@@ -98,7 +101,7 @@ class Parser:
                 TT.RBRACE: "'}' to close the block",
             }
             hint = friendly_names.get(token_type, f'token type {token_type.name}')
-            raise ParserError(f'Expected {hint}, but found \'{self.current.value}\'')
+            raise ParserError(f'Expected {hint}, but found \'{self.current.value}\'', self.current)
         
         token = self.current
         self.advance()
@@ -158,7 +161,8 @@ class Parser:
         type_hint = self.current
         if type_hint.type not in self.TYPE_HINT_TTs:
             raise ParserError(f'Expected a type hint, but got a {type_hint.type} '
-                              f'at {type_hint.line, type_hint.column}')
+                              f'at {type_hint.line, type_hint.column}', 
+                              name_token)
         self.advance()
 
         # nothing type:
@@ -179,7 +183,7 @@ class Parser:
         left = self.parse_binary()
         if self.check(*self.ASSIGN_OPS):
             if not isinstance(left, (ast.IdNode, ast.IndexNode)):
-                raise ParserError(f'Invalid assignment target: {left!r}')
+                raise ParserError(f'Invalid assignment target: {left!r}', self.current)
             assign_token = self.current
             self.advance()
             right = self.parse_assignment()
@@ -315,7 +319,7 @@ class Parser:
 
         iterator_id = self.expect(TT.ID)
         if iterator_id.value != var_name_token.value:
-            raise ParserError(f'Loop identifier mismatch: expected \'{var_name_token.value}\', but got \'{iterator_id.value}\'')
+            raise ParserError(f'Loop identifier mismatch: expected \'{var_name_token.value}\', but got \'{iterator_id.value}\'', iterator_id)
         self.expect(TT.IN)
         iterable = self.parse_expression()
         self.expect(TT.RPAREN)
@@ -339,7 +343,7 @@ class Parser:
         self.expect(TT.RPAREN)
         self.expect(TT.RIGHT_DOUBLE_ARROW)
         if not self.check(*self.TYPE_HINT_TTs):
-            raise ParserError(f'Invalid return type hint in {name.value} function definition')
+            raise ParserError(f'Invalid return type hint in {name.value} function definition', self.current)
         return_type = self.current
         self.advance()
         body = self._parse_block()
@@ -349,7 +353,7 @@ class Parser:
         param_name = self.expect(TT.ID)
         self.expect(TT.COLON)
         if not self.check(*self.TYPE_HINT_TTs):
-            raise ParserError( f'Invalid parameter type hint at {self.current.line}:{self.current.column}')
+            raise ParserError( f'Invalid parameter type hint at {self.current.line}:{self.current.column}', param_name)
         type_hint = self.current
         self.advance()
         return (param_name, type_hint)
@@ -363,7 +367,7 @@ class Parser:
 
     def parse_call(self, callee_node) -> ast.CallNode:
         if not isinstance(callee_node, ast.IdNode):
-            raise ParserError(f'Cannot call non-identifier expression: {callee_node!r}')
+            raise ParserError(f'Cannot call non-identifier expression: {callee_node!r}', self.current)
 
         self.expect(TT.LPAREN)
         args = []
@@ -381,8 +385,8 @@ class Parser:
         if handler is None:
             raise ParserError(
                 f'Unexpected token in expression: {self.current.type} '
-                f'at {self.current.line}, {self.current.column}'
-            )
+                f'at {self.current.line}, {self.current.column}',
+                self.current)
         return handler()
 
     # --------------------------- primary handlers --------------------------- #
@@ -443,8 +447,8 @@ class Parser:
             if self.check(TT.EOF):
                 raise ParserError(
                     f'Unterminated block, expected \'}}\' but reached end of input '
-                    f'at {self.current.line},{self.current.column}'
-                )
+                    f'at {self.current.line},{self.current.column}',
+                self.current)
             statements.append(self.parse_statement())
             self._consume_statement_terminator()
         self.expect(TT.RBRACE)
