@@ -2,19 +2,19 @@
 
 Hades is a programming language created by Toby Paradise as a passion project.
 
-# Syntax & Grammar
+## Syntax & Grammar
 
-## Basic grammar
+### Basic grammar
 
-### Semicolon rules
+#### Semicolon rules
 
 - Required in general
 - Not required right after a block (`}`).
 - Not required right before the end of a block (`}`)
 
-### Operators
+#### Operators
 
-#### Arithmetic Operators
+##### Arithmetic Operators
 
 |   Operation    |  Syntax  |
 | :------------: | :------: |
@@ -31,7 +31,7 @@ Hades is a programming language created by Toby Paradise as a passion project.
 N.B.: Unary plus is equivalent to absolute value
 : Exponentiation is not defined as an operator, but as a function `pow(a,b)`
 
-#### Comparison Operators
+##### Comparison Operators
 
 |        Operation         |     Syntax     |
 | :----------------------: | :------------: |
@@ -45,7 +45,7 @@ N.B.: Unary plus is equivalent to absolute value
 |  less than or equal to   |    `a <= b`    |
 |         in               | `a in b`       |
 
-#### Logical Operators
+##### Logical Operators
 
 | Operation |   Syntax   |
 | :-------: | :--------: |
@@ -54,7 +54,7 @@ N.B.: Unary plus is equivalent to absolute value
 |    OR     | `a \|\| b` |
 |    XOR    |  `a ^^ b`  |
 
-#### Bitwise Operations
+##### Bitwise Operations
 
 |  Operation  |  Syntax  |
 | :---------: | :------: |
@@ -65,9 +65,10 @@ N.B.: Unary plus is equivalent to absolute value
 | Shift left  | `a << b` |
 | Shift right | `a >> b` |
 
-#### Assignment Operators
+##### Assignment Operators
 
 Assignment: `a = b`
+
 | Syntax | Equivalence |
 | :-----: | :------: |
 | `a += b` | `a = a + b` |
@@ -82,13 +83,13 @@ Assignment: `a = b`
 | `a \|= b` | `a = a \| b` |
 | `a ^= b` | `a = a ^ b` |
 
-#### Operator Overloading
+##### Operator Overloading
 
 Operator overloading is used to redefine the use of an operator in a specific use case such as for a specific class (see below).
 
-### Datatypes:
+#### Datatypes
 
-#### Simple datatypes:
+##### Simple datatypes
 
 - nothing &rarr; `nothing`
 - boolean &rarr; `TRUE`, `FALSE`
@@ -96,13 +97,13 @@ Operator overloading is used to redefine the use of an operator in a specific us
 - floating point number &rarr; `1234.5678`
 - string &rarr; `'foo'`
 
-#### Complex datatypes:
+##### Complex datatypes
 
 - function &rarr; see below section
 - structure &rarr; ...
 - class &rarr; ...
 
-##### Arrays:
+###### Arrays
 
 - record &rarr; "element0, element1"
   - records are immutable sequences of items of arbitrary type.
@@ -113,7 +114,7 @@ Operator overloading is used to redefine the use of an operator in a specific us
   - lists are mutable and have built in methods such as .update(), .remove(), .add(), etc.. See below documentation for more detail.
   - accessed using list->element_index
 
-#### Defining variables using datatypes:
+##### Defining variables using datatypes
 
 |       Full name       | Definition name |
 | :-------------------: | :-------------: |
@@ -128,36 +129,36 @@ Operator overloading is used to redefine the use of an operator in a specific us
 
 Variables above must be decalred and initialized in the same statement, with the exeption of nothing. For example,
 
-```
+```hades
 foo: nothing;
 bar: bool = FALSE;
 ```
 
 Lists must note the type within the list, with the possiblity of multiple types, but records do not:
 
-```
+```hades
 baz: list = [1, 1.5, 2, 2.33];
 qux: record = "1, 1.5, 2, 2.33";
 ```
 
-#### Other declarations of complex datatypes
+##### Other declarations of complex datatypes
 
-##### Functions:
+###### Functions
 
-```
+```hades
 func my_function(parameter1: type, paramter2: type...) => ReturnType {
     // function body goes here
     => exp // returning
 };
 ```
 
-##### Structures:
+###### Structures
 
 Structures (structs) aggregate the storage of multiple data items, of potentially differing data types, into one contiguous memory block referenced by a single variable. An item is referred to as a 'struct value'.
 
 Example definition:
 
-```
+```hades
 Student: struct = {
     age: int;
     id: int;
@@ -168,7 +169,7 @@ Student: struct = {
 
 There are two ways to create a struct from a template:
 
-```
+```hades
 Alice: struct<Student> = {21, 82911, 'UMass Amherst', 3.712};
 Bob: struct<Student> = {
     age = 20,
@@ -180,7 +181,7 @@ Bob: struct<Student> = {
 
 The second can be used for more clarity, especially in cases with large structs with many items to keep track of.
 
-##### Classes:
+###### Classes
 
 A class acts as a constructor or template for objects created using the class. They are like structures, but they can also include methods that act like a function within the class.
 
@@ -190,7 +191,7 @@ Classes have an on-creation built in method that is called on creation (duh), ca
 
 Example definition:
 
-```
+```hades
 Student: class {
     creator Student(name: str, age: int, year: int, gpa: float) => nothing {
         my.name: str = name;
@@ -218,7 +219,7 @@ Student: class {
 
 Example creation:
 
-```
+```hades
 Alice: Student = Student{
     'Alice',
     20,
@@ -229,11 +230,11 @@ print(Alice.age); // prints 21
 !Alice // False
 ```
 
-### If statements
+#### If statements
 
 If statements are handled like most languages:
 
-```
+```hades
 foo = 5;
 if (foo == 3) {
     print('foo is 3');
@@ -245,15 +246,15 @@ if (foo == 3) {
 // outputs 'foo is 5'
 ```
 
-### Loops
+#### Loops
 
 There are four types of loops.
 
-#### While loops
+##### While loops
 
 A while loop checks a condition, then if the condition is truthy, executes the statement within the brackets. It continues doing this until the condition is false.
 
-```
+```hades
 while (condition) {
     // code goes here
 };
@@ -261,7 +262,7 @@ while (condition) {
 
 Do-while loops first do the statement within brackets, then check the condition after. This means that a do-while loop is executed at least once, buta a while loop may not be executed at all.
 
-```
+```hades
 do {
     // code goes here
 } while (condition);
@@ -269,7 +270,7 @@ do {
 
 Here is code using both types of while loops that both output
 
-```
+```hades
 0
 1
 2
@@ -277,7 +278,7 @@ Here is code using both types of while loops that both output
 
 using a while loop:
 
-```
+```hades
 i = 0;
 while (i < 3) {
     print(i);
@@ -287,7 +288,7 @@ while (i < 3) {
 
 using a do-while loop:
 
-```
+```hades
 i = 0;
 do {
     print(i);
@@ -295,43 +296,43 @@ do {
 } while i < 2;
 ```
 
-#### For loops
+##### For loops
 
 There are two types of for loops, a for loop and a for-each-in loop.
 
 The below code prints the same as the above while loops:
 
-```
+```hades
 for (i: int = 0; i < 3; i++) {
     print(i);
 };
 ```
 
-```
+```hades
 for (i: int; i in [0, 1, 2]) {
     print(i)
 }
 ```
 
-## Control flow keywords
+### Control flow keywords
 
-### Return
+#### Return
 
 A `return` statement returns a value from a function. This exits out of the function, but only if the return statement is executed (i.e., if the return statement is in an bracket that isn't evaluated then the function continues).
 
-### Next
+#### Next
 
 A `next` statement jumps to the next iterable in the interation. For while loops, this means jumping to the end of the outermost bracket (e.g., where `i++` is). For for loops, this either goes to the next element of the iterable or runs the next part of the definition (e..g, the `i++` of the loop definition).
 
-### Break
+#### Break
 
 A `break` statement exits a loop.
 
-### \_goTo
+#### \_goTo
 
 A `_goTo` statement goes to a specific label, which is defined at some point during the code.
 
-```
+```hades
 //...
 if (elem == 'end') {
     _goTo END
@@ -341,7 +342,7 @@ END:
 // code goes here
 ```
 
-## Truthiness
+### Truthiness
 
 Truthiness is used to determien whether a non-boolean value evaluates to a TRUE or FALSE, especially when dealing with if statements (see above)
 
@@ -356,15 +357,15 @@ Truthiness is used to determien whether a non-boolean value evaluates to a TRUE 
 |   list    |     non-empty     |    []     |
 | structure | containing values |   empty   |
 
-## Precedence
+### Precedence
 
-1.  Assignment         (=                                                ) <- lowest precedence, right-associative
-2.  Logical OR/XOR     (||, ^^                                           )
-3.  LogicalAND         (&&                                               )
-4.  Equality           (==, !=, ===, !==                                 )
-5.  Comparison         (<, >, <=, >=                                     )
-6.  Additive           (+, -                                             )
-7.  Multiplicative     (*, /, %                                          )
-8.  Unary              (!, -, unary +                                    )
-9.  Postfix            (++, --                                           )
-10. Primary            (numbers, strings, ids, bools, parenthesized exprs) <- highest precedence
+1. Assignment         (=                                                ) <- lowest precedence, right-associative
+2. Logical OR/XOR     (||, ^^                                           )
+3. LogicalAND         (&&                                               )
+4. Equality           (==, !=, ===, !==                                 )
+5. Comparison         (<, >, <=, >=                                     )
+6. Additive           (+, -                                             )
+7. Multiplicative     (*, /, %                                          )
+8. Unary              (!, -, unary +                                    )
+9. Postfix            (++, --                                           )
+10. Primary           (numbers, strings, ids, bools, parenthesized exprs) <- highest precedence
