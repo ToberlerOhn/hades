@@ -106,6 +106,7 @@ class Interpreter:
             'print' : self.__print__    ,
             'type'  : self.__get_type__ ,
             'len'   : self.__len__      ,
+            'pow'   : self.__pow__      ,
         }
 
     # ------------------------------ entry point ----------------------------- #
@@ -443,6 +444,12 @@ class Interpreter:
         if not isinstance(e, (str, list)):
             raise InterpreterError(f'len() takes strings or lists, but got {self._py_type_to_hds_type(type(e))}', call_token)
         return len(e)
+    
+    def __pow__(self, args: list[int | float], call_token: Token):
+        if len(args) != 2:
+            raise InterpreterError(f"pow() takes exactly 2 arguments (base and exponent), but got {len(args)}", call_token)
+        b, e = args[0], args[1]
+        return b ** e
 
     @staticmethod
     def _py_type_to_hds_type(py_type):
@@ -451,6 +458,7 @@ class Interpreter:
             int  : 'int'  ,
             float: 'float',
             str  : 'str'  ,
+            list : 'list' ,
         }.get(py_type, py_type.__name__)
 
 
