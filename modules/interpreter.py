@@ -429,8 +429,44 @@ class Interpreter:
     # ------------------------------- built-ins ------------------------------ #
 
     def __print__(self, args: list, call_token: Token):
-        print(*(self._to_string(a) for a in args), sep='')
+        formatted_args = []
+        for arg in args:
+            if isinstance(arg, str):
+                formatted_args.append(self._format_string(arg, call_token))
+            else:
+                formatted_args.append(self._to_string(arg, call_token))
+
+        output = ' '.join(formatted_args)
+        print(output)
         return None
+    
+    def _format_string(self, value: str, call_token: Token) -> str:
+        result = ''
+        i = 0
+        while i < len(value):
+            if value[i] != '%':
+                result += value[i]
+                i += 1
+            else:
+                if i + 1 < len(value) and value[i+1] == '%':
+                    result += '%'
+                    i += 2
+                    continue
+
+                end = value.find('%', i + 1)
+                if end == -1:
+                    raise InterpreterError('Unterminated format placeholder in string', call_token)
+                placeholder = value[i+1:end]
+                if not placeholder.isidentifier():
+                    raise InterpreterError(f"Invalid format placeholder '{placeholder}'", call_token)
+                try:
+                    replacement = self.scope.get(placeholder)
+                except KeyError:
+                    raise InterpreterError(f"Undefined variable '{placeholder}' in format string", call_token)
+                result += self._to_string(replacement, call_token)
+                i = end + 1
+
+        return result
 
     def __get_type__(self, args: list, call_token: Token):
         if len(args) != 1:
@@ -462,15 +498,15 @@ class Interpreter:
         }.get(py_type, py_type.__name__)
 
 
-    @staticmethod
-    def _to_string(value) -> str:
+    def _to_string(self, value, call_token: Token) -> str:
         if isinstance(value, bool):
             return 'TRUE' if value else 'FALSE'
         if value is None:
             return 'nothing'
         if isinstance(value, float):
             return f'{value:.10g}'.rstrip('0').rstrip('.') if '.' in f'{value:.10g}' else f'{value:.10g}'
-        return str(value)
+        fstring = self._format_string(str(value), call_token)
+        return fstring
 
     # --------------------------- helper functions --------------------------- #
 
